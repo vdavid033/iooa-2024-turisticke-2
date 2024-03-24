@@ -1,6 +1,18 @@
 <template>
-  <div style="background-color: #229df9">
+  <div style="background-color: #69b6f0">
     <div class="q-pa-md row items-start q-gutter-md">
+      <br>
+      <!-- DMA: Kod za filter box -->
+      <!-- treba ga smjestiti bolje, čudno izgleda xD -->
+      <q-input
+        v-model="searchTerm"
+        outlined
+        dense
+        placeholder="Pretražite atrakcije po nazivu..."
+        @keyup.enter="search"
+        class="my-search-bar"/>
+      <br>
+      <!-- Originalni kod -->
       <q-card v-for="post in posts" :key="post.id" class="my-card">
         <q-img :src="post.slika" />
 
@@ -91,6 +103,8 @@
         </q-card-section>
       </q-card>
     </div>
+
+
   </div>
 </template>
 <script>
@@ -224,10 +238,12 @@ const deleteById = async (id) => {
   getPosts();
 };
 
+
+
+///////////////////////////////
 onMounted(() => {
   getPosts();
 });
-
 const goToAtrakcijeDetalji = (id) => {
   router.push({
     name: "one_atraction",
@@ -236,6 +252,16 @@ const goToAtrakcijeDetalji = (id) => {
     },
   });
 };
+// DMA filtar kod pokušaj. Stranica se izgubi kad je aktivan.
+//Search filtar za naziv
+/*const search = () => {
+  filteredPosts.value = posts.value.filter(
+      (post) => post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()));
+};
+const filteredPosts = computed(() => {
+  return posts.value.filter(post => post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()));
+});
+*/
 </script>
 
 <style>
@@ -247,5 +273,13 @@ const goToAtrakcijeDetalji = (id) => {
 .my-card {
   width: 100%;
   max-width: 300px;
+}
+
+.my-search-bar {
+  margin-bottom: 10px;
+  margin-left: 20px;
+  background-color: #ffffff9d;
+  width:40%;
+  border-radius: 10px;
 }
 </style>
