@@ -1,0 +1,7 @@
+INSERT INTO atrakcije (id_atrakcije, naziv, opis, slika, prosjecna_ocjena, adresa)
+VALUES
+(RAND(), 'Rijeka', 'Grad koji  teče', 'https://media.timeout.com/images/105552214/image.jpg', 4, 'Primorsko Goranska županija'),
+(RAND(), 'Gola', 'Podravsko selo roda', 'https://tzp-sredisnja-podravina.hr/wp-content/uploads/2018/12/OP%C4%86INA-GOLA-400x300.jpg', 4, 'Koprivničko-Križevačka županija'),
+(RAND(), 'Novi Vinodolski', 'Kamen krs i maslina', 'https://www.visit-croatia.hr/photos/districts/thumbs/Rivijera-Novi-Vinodolski-615ef1d72f5e6666582812_huge.jpg', 4, 'Dalmacija'),
+(RAND(), 'Zagreb', 'katastrofa', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Zagreb_%2829255640143%29.jpg/1200px-Zagreb_%2829255640143%29.jpg', 1, 'glavni grad'),
+(RAND(), 'Koprivnica', 'Podravka u srcu', 'https://www.livecamcroatia.com/data/public/lokacije/koprivnica_lokacija.jpg', 5, 'Kc-Kž');
