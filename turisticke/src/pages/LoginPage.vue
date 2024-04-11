@@ -1,11 +1,8 @@
 <template>
-  <!-- <q-header elevated class="bg-deep-purple text-white"> -->
-
-  <q-tabs v-model="tab" class="bg-primary text-white ">
-    <q-tab name="Prijava" label="Prijava" @click.prevent="register = false" />
-    <q-tab name="Registracija" label="Registracija" @click.prevent="register = true" />
+  <q-tabs v-model="tab" class="bg-primary text-white">
+    <q-tab name="Prijava" label="Prijava" @click.prevent="switchTab(false)" />
+    <q-tab name="Registracija" label="Registracija" @click.prevent="switchTab(true)" />
   </q-tabs>
-  <!-- </q-header> -->
 
   <q-card class="my-card">
     <q-card-section>
@@ -17,90 +14,74 @@
           <div> </div>
           <q-input v-model="credentials.password" class="input" outlined type="password" label="Password" />
 
-
           <div class="row justify-between">
-            <q-btn class="bg-primary text-white" to="/">Odustani</q-btn>
+            <q-btn class="bg-primary text-white" @click.prevent="cancel">Odustani</q-btn>
             <q-btn class="bg-primary text-white" type="submit">{{ tab }}</q-btn>
           </div>
         </div>
-
       </form>
     </q-card-section>
   </q-card>
 </template>
 
 <script setup>
-import { ref, reactive } from "vue"
-//import { useStoreAuth } from "src/stores/storeAuth"
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
+const router = useRouter();
 
-/*
-store
-*/
-//const storeAuth = useStoreAuth()
+const register = ref(false);
+const tab = ref("");
 
-
-const register = ref(false)
-const tab = ref('')
-
-
-
-if (!register.value) {
-  tab.value = "Prijava"
-}
-else {
-  tab.value = "Registracija"
-}
-
-/*
-credentials
-*/
+const switchTab = (value) => {
+  register.value = value;
+  tab.value = value ? "Registracija" : "Prijava";
+};
 
 const credentials = reactive({
-  email: '',
-  password: ''
-})
+  email: "",
+  password: "",
+});
 
-/*
-  submit
-*/
-
-const onSubmit = () => {
-  console.log("forma potvrđana")
+const onSubmit = async () => {
+  console.log("forma potvrđena");
 
   if (!credentials.email || !credentials.password) {
-    alert('Unesite email i lozinku')
-  }
-  else {
-    if (register.value) {
-      console.log('Registriraj korisnika sa:', credentials)
+    alert("Unesite email i lozinku");
+  } else {
+    try {
+      if (register.value) {
+        const response = await axios.post('http://localhost:4200/register', {
+          email: credentials.email,
+          password: credentials.password
+        });
+        console.log(response.data.msg);
+      } else {
+        const response = await axios.post('http://localhost:4200/login', {
+          email: credentials.email,
+          password: credentials.password
+        });
+        console.log(response.data.msg);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Došlo je do greške prilikom komunikacije sa serverom.");
     }
-    else {
-      console.log('Prijavi korisnika sa:', credentials)
-    }
   }
+};
 
-
-}
-
+const cancel = () => {
+  router.push("/");
+};
 </script>
 
 <style lang="sass" scoped>
 .my-card
-    width: 100%
-    max-width: 400px
-    margin: 0 auto
-    margin-top: 40px
-    font-size: 36px
-    width: 100%
-
-
+  width: 100%
+  max-width: 400px
+  margin: 0 auto
+  margin-top: 40px
+  font-size: 36px
+  width: 100%
 </style>
-
-<!-- .loginText
-text-align: center
-font-size: 36px
-
-.input,  -->
-
-
