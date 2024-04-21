@@ -60,7 +60,6 @@
           </q-card-section>
 
           <q-card-section>
-            <!-- Remaining card content -->
           </q-card-section>
         </q-card>
       </template>
@@ -101,11 +100,15 @@ const deleteById = async (id) => {
   getPosts();
 };
 
-//Search filter for the title
+//Filtar
 const search = () => {
   filteredPosts.value = posts.value.filter(
-    (post) => post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase())
-  );
+    (post) => 
+    post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase())
+    || post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
+    || post.geografska_sirina.toLowerCase().includes(searchTerm.value.toLowerCase())
+    || post.geografska_duzina.toLowerCase().includes(searchTerm.value.toLowerCase())
+    || post.adresa.toLowerCase().includes(searchTerm.value.toLowerCase()));
 };
 
 onMounted(() => {
@@ -113,7 +116,12 @@ onMounted(() => {
 });
 
 const filteredPosts = computed(() => {
-  return posts.value.filter(post => post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()));
+  return posts.value.filter(post => 
+  post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase())
+  || post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
+  || post.geografska_sirina.toLowerCase().includes(searchTerm.value.toLowerCase())
+  || post.geografska_duzina.toLowerCase().includes(searchTerm.value.toLowerCase())
+  || post.adresa.toLowerCase().includes(searchTerm.value.toLowerCase()));
 });
 
 const goToAtrakcijeDetalji = (id) => {

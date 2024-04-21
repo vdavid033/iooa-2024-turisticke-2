@@ -109,6 +109,7 @@ app.get('/slike', (req,res)=>{
       }
   });
 });
+//////////////////////////////////////////////////////////////////////////////////////////////
 /// uzimanje podataka o komentarima
 app.get("/komentari", function (request, response) {
   dbConn.query("SELECT * FROM Komentari", function (error, results, fields) {
@@ -120,8 +121,17 @@ app.get("/komentari", function (request, response) {
       });
   });
 });
-
-
+/// uzimanje podataka o ocjeni
+app.get("/ocjene", function (request, response) {
+  dbConn.query("SELECT * FROM Ocjene", function (error, results, fields) {
+      if (error) throw error;
+      return response.send({
+          error: false,
+          data: results,
+          message: "lista ocjena.",
+      });
+  });
+});
 app.get('/komentari/:id', function (request, response) {
 let id_atrakcije = request.params.id;
 dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije=?", id_atrakcije, function (error, results, fields) {
@@ -133,8 +143,18 @@ dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije=?", id_atrakcije, fu
     });
 });
 });
+app.get('/ocjene/:id', function (request, response) {
+  let id_atrakcije = request.params.id;
+  dbConn.query("SELECT * FROM Ocjene WHERE VK_ID_atrakcije=?", id_atrakcije, function (error, results, fields) {
+      if (error) throw error;
+      return response.send({
+          error: false,
+          data: results,
+          message: "lista ocjena.",
+      });
+  });
+  });
 // Dodavanje komentara za atrakciju po ID-u
-
 app.post('/dodajKomentar/:id', (req, res) => {
 const data = [req.body.Komentar, req.params.id]
 dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", data,(err,result)=>{
@@ -145,6 +165,16 @@ dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", d
   }
 })
 });
+app.post('/dodajOcjene/:id', (req, res) => {
+  const data = [req.body.Komentar, req.params.id]
+  dbConn.query("INSERT INTO Ocjene( Ocjene, VK_ID_atrakcije) VALUES (?,?)", data,(err,result)=>{
+    if(err){
+      res.send('Error')
+    }else{
+      res.send(result)
+    }
+  })
+  });
 
 
 

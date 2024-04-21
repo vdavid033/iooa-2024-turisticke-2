@@ -106,9 +106,11 @@
       <q-btn class="button" @click="$router.push('/')" label="Natrag na početnu" />
     </q-card-section>
     <q-card-section>
-            <q-btn class="button"  :to="'/komentari/' + trenutniID" label="Dodaj komentar" />
-
-        </q-card-section>
+      <q-btn class="button"  :to="'/komentari/' + trenutniID" label="Dodaj komentar" />
+    </q-card-section>
+    <q-card-section>
+      <q-btn class="button"  :to="'/ocjene/' + trenutniID" label="Dodaj ocjene!" />
+    </q-card-section>
 
     <q-separator />
 

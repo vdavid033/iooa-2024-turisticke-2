@@ -44,6 +44,13 @@ const routes = [
       {name: "komentari", path: ":id", component: () => import("src/pages/komentariPage.vue") },
     ],
   },
+  {
+    path: "/ocjene",
+    component: () => import("layouts/BlankLayout.vue"),
+    children: [
+      {name: "ocjene", path: ":id", component: () => import("src/pages/OcjenePage.vue") },
+    ],
+  },
 
 
   {
