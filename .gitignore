@@ -12,3 +12,6 @@ folder/.*
 
 # Ignoriši određeni fajl u određenom direktorijumu
 folder/file.txt
+
+
+node_modules/
