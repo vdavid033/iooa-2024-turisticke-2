@@ -47,23 +47,6 @@
       
     }
   };
-
-  const dodajKomentar = async (komentar, trenutniID) => {
-  try {
-    console.log('Komentar: ', komentar);
-    console.log("ID: ", trenutniID);
-
-    const response = await api.post(`http://localhost:4200/dodajKomentar/${trenutniID}`, {
-      Komentar: komentar
-    });
-    console.log(response.data);
-
-    message.value = 'Uspješno ste dodali komentar!'; 
-  } catch (error) {
-    console.log(error);
-    
-  }
-};
   </script>
   
   
