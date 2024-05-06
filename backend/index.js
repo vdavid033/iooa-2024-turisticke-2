@@ -156,8 +156,8 @@ app.get('/ocjene/:id', function (request, response) {
   });
 // Dodavanje komentara za atrakciju po ID-u
 app.post('/dodajKomentar/:id', (req, res) => {
-const data = [req.body.Komentar, req.params.id]
-dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", data,(err,result)=>{
+  const data = [req.body.Komentar, req.params.id]
+  dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", data,(err,result)=>{
   if(err){
     res.send('Error')
   }else{
@@ -165,6 +165,7 @@ dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", d
   }
 })
 });
+///////////////// ovo je moje ocjene
 app.post('/dodajOcjene/:id', (req, res) => {
   const data = [req.body.Komentar, req.params.id]
   dbConn.query("INSERT INTO Ocjene( Ocjene, VK_ID_atrakcije) VALUES (?,?)", data,(err,result)=>{

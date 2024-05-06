@@ -7,11 +7,9 @@
       <q-input class="textarea" outlined v-model="komentar" label="Unesi svoj komentar.. " :dense="dense" />
   </div>
     <q-card-section>
-            <q-btn label="Dodaj komentar" @click="dodajKomentar(komentar, trenutniID)" />
-        </q-card-section>
-
-
-  <q-card-section>
+      <q-btn label="Dodaj komentar" @click="dodajKomentar(komentar, trenutniID)" />
+    </q-card-section>
+    <q-card-section>
       <q-btn color="#4CAF50" @click="$router.push('/')" label="Natrag na početnu" />
     </q-card-section>
 

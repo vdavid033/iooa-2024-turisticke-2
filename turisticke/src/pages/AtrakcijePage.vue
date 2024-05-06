@@ -116,7 +116,6 @@
 
     <div class="q-pa-md row items-start q-gutter-xs">
       <p style="font-size: 25px; color: white">Komentari:</p>
-
     </div>
     <div class="q-pa-md row items-start q-gutter-xs">
     <p style="font-size: 20px; color: white">Ovdje možete pogledati komentare o atrakciji</p>
@@ -142,6 +141,34 @@
         </q-card-section>
       </q-card>
     </div>
+    <!-- {{ TEST OCJENE }} -->
+    <div class="q-pa-md row items-start q-gutter-xs">
+      <p style="font-size: 25px; color: white">Ocjene Testna Faza:</p>
+    </div>
+    <div class="q-pa-md row items-start q-gutter-xs">
+    <p style="font-size: 20px; color: white">Ovdje vidimo ocjene, kao dokaz da imamo komunikaciju s bazom.</p>
+    </div>
+    <!-- {{ marks }} -->
+    <div class="q-pa-md row items-start q-gutter-md">
+      <q-card v-for="item in marks" :key="item" class="my-card" flat bordered>
+        <q-item>
+          <q-item-section avatar>
+            <q-avatar>
+              <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+            </q-avatar>
+          </q-item-section>
+          <q-item-section>
+            {{item.vk_id_korisnika}}
+          </q-item-section>
+        </q-item>
+        <q-separator />
+        <q-card-section horizontal>
+          <q-card-section>
+            {{item.Ocjene}}
+          </q-card-section>
+        </q-card-section>
+      </q-card>
+    </div>
   </div>
 </template>
 
@@ -155,6 +182,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 const posts = ref([])
 const comments = ref([])
+const marks = ref([])
 const route = useRoute()
 const router = useRouter()
 
@@ -164,8 +192,14 @@ const getPosts = async () => {
     const response = await api.get(`/atrakcije/${trenutniID}`)
     posts.value = response.data
     const komentari = await api.get(`/komentari/${trenutniID}`)
-    comments.value = komentari.data.data
+    comments.value = komentari.data.data    
     console.log(komentari.data);
+    console.log("ID je: ", trenutniID)
+    console.log("Podatak iz baze po ID: ", posts.value)
+    // ocjene
+    const ocjene = await api.get(`/ocjene/${trenutniID}`)
+    marks.value = ocjene.data.data
+    console.log(ocjene.data);
     console.log("ID je: ", trenutniID)
     console.log("Podatak iz baze po ID: ", posts.value)
 

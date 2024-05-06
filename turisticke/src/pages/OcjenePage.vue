@@ -2,13 +2,12 @@
     <div style="background-color: #229df9;">
   
     <h3>Unos ocjene</h3>
-    <h6>Unesite ocjenu, od 1 do 10.</h6>
-    <!-- Napravi da bude dropdown select, umjesto upisa ocjene-->
+    <h6>Unesite ocjenu, od 1 do 5.</h6> <!-- Napravi da bude dropdown select, umjesto upisa ocjene-->
     <div class="q-pa-md row items-start q-gutter-md">
         <q-input class="textarea" outlined v-model="ocjene" label="Unesi ocjenu..." :dense="dense" />
     </div>
     <q-card-section>
-        <q-btn label="Dodaj ocjene" @click="dodajOcjene(ocjene, trenutniID)" />
+        <q-btn label="Dodaj ocjenu" @click="dodajOcjene(ocjene, trenutniID)" />
     </q-card-section>  
     <q-card-section>
         <q-btn color="#4CAF50" @click="$router.push('/')" label="Natrag na početnu" />
@@ -30,7 +29,7 @@
   const trenutniID = route.params.id
   const message = ref('');
   
-  //Dodavanje ocjenea za atrakciju
+  //Dodavanje ocjene za atrakciju
   
   const dodajOcjene = async (ocjene, trenutniID) => {
     try {
@@ -48,6 +47,23 @@
       
     }
   };
+
+  const dodajKomentar = async (komentar, trenutniID) => {
+  try {
+    console.log('Komentar: ', komentar);
+    console.log("ID: ", trenutniID);
+
+    const response = await api.post(`http://localhost:4200/dodajKomentar/${trenutniID}`, {
+      Komentar: komentar
+    });
+    console.log(response.data);
+
+    message.value = 'Uspješno ste dodali komentar!'; 
+  } catch (error) {
+    console.log(error);
+    
+  }
+};
   </script>
   
   
