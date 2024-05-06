@@ -1,11 +1,11 @@
 <template>
   <div class="registration-form">
-      <h2 class="form-title">Prijava</h2> <!-- Dodajemo naslov forme -->
+    <h2 class="form-title">Prijava</h2> <!-- Dodajemo naslov forme -->
     <input type="text" v-model="email" placeholder="Korisničko ime" class="input-field">
     <input type="password" v-model="password" placeholder="password" class="input-field">
     <button @click="login" class="submit-btn">Prijava</button>
     <router-link to="/registracijaputanja" class="link-btn">Registracija</router-link>
-    <router-link to="/sve" class="link-btn">Odustani</router-link>
+    <router-link v-if="showCancelLink" to="/sve" class="link-btn">Odustani</router-link>
   </div>
 </template>
 
@@ -16,7 +16,8 @@ export default {
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      showCancelLink: true // Dodali smo ovo polje za kontrolu prikaza linka za odustajanje
     };
   },
   methods: {
@@ -84,7 +85,7 @@ export default {
   text-align: center;
 }
 
-.submit-btn:hover, .link-btn:hover {
+.submit-btn:hover {
   background-color: red;
 }
 
