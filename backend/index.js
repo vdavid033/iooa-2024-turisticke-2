@@ -47,34 +47,47 @@ app.use(function (req, res, next) {
 // kraj fix-a
 
 // Definiranje rute za registraciju korisnika
-app.post('/register', (req, res) => {
-  const { email, password } = req.body;
-  const uloga = 'korisnik';  // Postavljanje default vrijednosti 'korisnik' za uloga
 
-  // Prvo hashiramo lozinku
-  bcrypt.hash(password, saltRounds, function (err, hashedPassword) {
-    if (err) {
-      console.error("Error hashing password:", err);
-      return res.status(500).send({ status: 'error', message: 'Greška prilikom hashiranja lozinke.', error: err.message });
-    }
-
-    // Ako nema greške, nastavljamo s upisom u bazu
-    dbConn.query('INSERT INTO users (email, password, uloga) VALUES (?, ?, ?)',
-      [email, hashedPassword, uloga], (error, results, fields) => {
-        if (error) {
-          console.error("Database error:", error);
-          res.status(500).send({ status: 'error', message: 'Greška prilikom registracije.', error: error.sqlMessage });
-        } else {
-          res.send({ status: 'success', message: 'Uspješna registracija' });
-        }
-      });
-  });
-});
 
 
 const saltRounds = 10;
 
+app.post('/register', (req, res) => {
+  const { email, password } = req.body;
+  const uloga = 'korisnik';  // Postavljanje default vrijednosti 'korisnik' za uloga
 
+  // Prvo provjeravamo postoji li već korisnik s istim emailom
+  dbConn.query('SELECT email FROM users WHERE email = ?', [email], (error, results, fields) => {
+    if (error) {
+      console.error("Database error:", error);
+      return res.status(500).send({ status: 'error', message: 'Greška prilikom provjere emaila.', error: error.sqlMessage });
+    }
+
+    if (results.length > 0) {
+      // Ako korisnik već postoji, šaljemo poruku o grešci
+      return res.status(409).send({ status: 'error', message: 'Email adresa je već registrirana.' });
+    } else {
+      // Ako korisnik ne postoji, hashiramo lozinku
+      bcrypt.hash(password, saltRounds, function (err, hashedPassword) {
+        if (err) {
+          console.error("Error hashing password:", err);
+          return res.status(500).send({ status: 'error', message: 'Greška prilikom hashiranja lozinke.', error: err.message });
+        }
+
+        // Upisujemo novog korisnika u bazu
+        dbConn.query('INSERT INTO users (email, password, uloga) VALUES (?, ?, ?)',
+          [email, hashedPassword, uloga], (error, results, fields) => {
+            if (error) {
+              console.error("Database error:", error);
+              res.status(500).send({ status: 'error', message: 'Greška prilikom registracije.', error: error.sqlMessage });
+            } else {
+              res.send({ status: 'success', message: 'Uspješna registracija' });
+            }
+          });
+      });
+    }
+  });
+});
 // Dodajemo endpoint za prijavu
 app.post("/prijavi", function (req, res) {
   const { email, password } = req.body;

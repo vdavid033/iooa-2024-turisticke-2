@@ -2,7 +2,7 @@
   <div class="registration-form">
     <h2 class="form-title">Registracija</h2> <!-- Dodajemo naslov forme -->
     <input type="text" v-model="email" placeholder="Korisničko ime" class="input-field">
-    <input type="password" v-model="password" placeholder="Password" class="input-field">
+    <input type="password" v-model="password" placeholder="Lozinka" class="input-field">
     <button @click="register" class="submit-btn">Registracija</button>
     <br>
     <router-link to="/" class="link-btn">Odustani</router-link>
@@ -25,14 +25,18 @@ export default {
         email: this.email,
         password: this.password
       })
-        .then(response => {
+      .then(response => {
+        if (response.status >= 200 && response.status < 300) {
           alert(response.data.message);
-          // Preusmjeravanje na /sve nakon uspješne registracije
           this.$router.push('/');
-        })
-        .catch(error => {
-          console.error(error);
-        });
+        } else {
+          alert(response.data.message); // Prikaz poruke o grešci
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        alert(error.response.data.message); // Prikaz poruke o grešci kada server vrati statusni kod greške
+      });
     }
   }
 }
