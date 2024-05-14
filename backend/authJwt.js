@@ -25,7 +25,7 @@ const verifyToken = (roles) => (req, res, next) => {
         }
 
         // Assign the userId and role to the request object
-        req.userId = decoded.id;
+        req.userId = decoded.id_korisnika;
         const userRole = decoded.uloga;
 
         // Split the input roles string by commas and trim whitespace

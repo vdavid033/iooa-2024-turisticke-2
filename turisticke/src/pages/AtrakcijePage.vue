@@ -150,6 +150,7 @@
 import { ref, onMounted } from "vue"
 import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router';
+import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
 
 const posts = ref([])
 const comments = ref([])
@@ -158,20 +159,29 @@ const router = useRouter()
 
 const trenutniID = route.params.id
 const getPosts = async () => {
-  try {
-    const response = await api.get(`/atrakcije/${trenutniID}`)
-    posts.value = response.data
-    const komentari = await api.get(`/komentari/${trenutniID}`)
-    comments.value = komentari.data.data
-    console.log(komentari.data);
-    console.log("ID je: ", trenutniID)
-    console.log("Podatak iz baze po ID: ", posts.value)
-
-  } catch (error) {
-    console.log(error)
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("No token found.");
+    return;
   }
-}
 
+  const decodedToken = jwtDecode(token);
+  const idKorisnika = decodedToken.id; // Extract user ID from token
+
+  try {
+    const response = await api.get(`/atrakcije/${trenutniID}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        id_korisnika: idKorisnika
+      }
+    });
+    posts.value = response.data ? [response.data] : []; // Ensure posts is always an array
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+  }
+};
 
 //Dodavanje slike
 

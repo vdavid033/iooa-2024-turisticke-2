@@ -1,11 +1,13 @@
 <template>
   <div class="registration-form">
-    <h2 class="form-title">Prijava</h2> <!-- Dodajemo naslov forme -->
-    <input type="text" v-model="email" placeholder="Korisničko ime" class="input-field">
-    <input type="password" v-model="password" placeholder="password" class="input-field">
+    <h2 class="form-title">Prijava</h2>
+    <input type="text" v-model="korisnicko_ime" placeholder="Korisničko ime" class="input-field">
+    <input type="password" v-model="lozinka" placeholder="Lozinka" class="input-field">
     <button @click="login" class="submit-btn">Prijava</button>
-    <router-link to="/registracijaputanja" class="link-btn">Registracija</router-link>
-    <router-link v-if="showCancelLink" to="/sve" class="link-btn">Odustani</router-link>
+    <div class="links">
+      <router-link to="/registracijaputanja" class="link-btn">Registracija</router-link>
+      <router-link to="/" class="link-btn">Odustani</router-link>
+    </div>
   </div>
 </template>
 
@@ -15,22 +17,21 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      email: '',
-      password: '',
-      showCancelLink: true // Dodali smo ovo polje za kontrolu prikaza linka za odustajanje
+      korisnicko_ime: '',
+      lozinka: ''
     };
   },
   methods: {
     async login() {
       try {
         const response = await axios.post("http://localhost:4200/prijavi", {
-          username: this.email, // Obratite pažnju na ova polja
-          password: this.password,
+          korisnicko_ime: this.korisnicko_ime,
+          lozinka: this.lozinka,
         });
 
         if (response.data.success) {
           localStorage.setItem("token", response.data.token);
-          this.$router.push('/sve');
+          this.$router.push('/');
         } else {
           this.$q.notify({
             color: "negative",
@@ -59,39 +60,46 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  width: 100%;  /* Osigurava da obrazac zauzima cijelu širinu */
+  height: 100vh; /* Visina viewporta za centriranje na ekranu */
   background-color: #ffffff;
 }
 
+.form-title {
+  margin-bottom: 20px;
+}
+
 .input-field {
+  width: 90%; /* Veća širina za bolje iskustvo na mobilnim uređajima */
+  max-width: 400px; /* Maksimalna širina za veće ekrane */
   margin: 10px 0;
-  padding: 10px;
-  width: 100%;
+  padding: 15px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 15px; /* Zaobljeni rubovi za input polja */
 }
 
 .submit-btn, .link-btn {
-  padding: 10px 20px;
+  width: 90%;
+  max-width: 400px;
+  padding: 15px;
   margin-top: 10px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px; /* Zaobljeni rubovi za gumbove */
   cursor: pointer;
-  text-decoration: none;
-  display: block;
-  width: 100%;
   text-align: center;
+  text-decoration: none; /* Uklanja podcrtavanje za router-link */
 }
 
-.submit-btn:hover {
-  background-color: red;
+.submit-btn:hover, .link-btn:hover {
+  background-color: #0056b3;
 }
 
-.link-btn {
-  background-color: transparent;
-  color: #007bff;
-  text-decoration: underline;
+.links {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center; /* Centriranje linkova */
 }
 </style>

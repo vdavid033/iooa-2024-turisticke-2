@@ -35,18 +35,26 @@ const message = ref('');
 
 const dodajKomentar = async (komentar, trenutniID) => {
   try {
-    console.log('Komentar: ', komentar);
-    console.log("ID: ", trenutniID);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("Token not found. Please log in.");
+      return;
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    };
 
     const response = await api.post(`http://localhost:4200/dodajKomentar/${trenutniID}`, {
       Komentar: komentar
-    });
+    }, config); // Dodajemo config s tokenom
     console.log(response.data);
 
-    message.value = 'Uspješno ste dodali komentar!'; 
+    message.value = 'Uspješno ste dodali komentar!';
   } catch (error) {
     console.log(error);
-    
   }
 };
 </script>

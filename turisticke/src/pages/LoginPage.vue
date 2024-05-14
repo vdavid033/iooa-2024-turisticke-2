@@ -1,10 +1,9 @@
 <template>
   <div class="registration-form">
-    <h2 class="form-title">Registracija</h2> <!-- Dodajemo naslov forme -->
-    <input type="text" v-model="email" placeholder="Korisničko ime" class="input-field">
-    <input type="password" v-model="password" placeholder="Lozinka" class="input-field">
-    <button @click="register" class="submit-btn">Registracija</button>
-    <br>
+    <h2 class="form-title">Registracija</h2>
+    <input type="text" v-model="korisnicko_ime" placeholder="Korisničko ime" class="input-field">
+    <input type="password" v-model="lozinka" placeholder="Lozinka" class="input-field">
+    <button @click="register" class="submit-btn">Registriraj se</button>
     <router-link to="/" class="link-btn">Odustani</router-link>
   </div>
 </template>
@@ -15,27 +14,22 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      email: '',
-      password: ''
+      korisnicko_ime: '',
+      lozinka: ''
     };
   },
   methods: {
     register() {
       axios.post('http://localhost:4200/register', {
-        email: this.email,
-        password: this.password
+        korisnicko_ime: this.korisnicko_ime,
+        lozinka: this.lozinka
       })
       .then(response => {
-        if (response.status >= 200 && response.status < 300) {
-          alert(response.data.message);
-          this.$router.push('/');
-        } else {
-          alert(response.data.message); // Prikaz poruke o grešci
-        }
+        alert(response.data.message);
+        this.$router.push('/');
       })
       .catch(error => {
-        console.error(error);
-        alert(error.response.data.message); // Prikaz poruke o grešci kada server vrati statusni kod greške
+        console.error('Registration failed:', error);
       });
     }
   }
@@ -48,33 +42,43 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  width: 100%; /* Ensures form takes the full width */
+  height: 100vh; /* Viewport height for centering on screen */
   background-color: #ffffff;
 }
 
+.form-title {
+  margin-bottom: 20px;
+}
+
 .input-field {
+  width: 90%; /* Wider for better mobile experience */
+  max-width: 400px; /* Max width for larger screens */
   margin: 10px 0;
-  padding: 10px;
-  width: calc(100% - 20px); /* širina je 100% minus padding */
+  padding: 15px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 15px; /* Rounded corners for inputs */
 }
 
 .submit-btn, .link-btn {
-  padding: 10px 20px;
+  width: 90%;
+  max-width: 400px;
+  padding: 15px;
   margin-top: 10px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px; /* Rounded corners for buttons */
   cursor: pointer;
-  text-decoration: none;
-  display: block;
-  width: calc(100% - 20px); /* širina je 100% minus padding */
   text-align: center;
+  text-decoration: none; /* Removes underline for router-link */
 }
 
 .submit-btn:hover, .link-btn:hover {
   background-color: #0056b3;
+}
+
+.link-btn {
+  display: block; /* Ensures the button is block level to fill width */
 }
 </style>

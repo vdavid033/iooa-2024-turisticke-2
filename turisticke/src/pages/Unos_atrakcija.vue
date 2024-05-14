@@ -109,6 +109,8 @@
 // eslint-disable-next-line no-unused-vars
 import { QDialog } from "quasar";
 import imageCompression from "browser-image-compression";
+import { jwtDecode } from 'jwt-decode'; // Uvoz jwt-decode biblioteke
+
 // eslint-disable-next-line no-unused-vars
 import { ref } from "vue";
 import axios from "axios"; // Import axios
@@ -196,6 +198,21 @@ export default {
       this.$refs.adresaRef.resetValidation();
     },
     async submitForm() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token not found. Please log in.");
+        return;
+      }
+
+      let userId;
+      try {
+        const decoded = jwtDecode(token);
+        userId = decoded.id; // Pretpostavlja se da se ID korisnika nalazi pod ključem 'id_korisnika' u token
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        return;
+      }
+
       const sampleData = {
         naziv: this.inputNaziv,
         opis: this.inputOpis,
@@ -203,11 +220,20 @@ export default {
         geografska_duzina: this.inputDuzina,
         geografska_sirina: this.inputSirina,
         adresa: this.inputAdresa,
+        id_korisnika: userId // Dodajemo pročitani ID korisnika
       };
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
       try {
         const response = await axios.post(
           "http://localhost:4200/unosAtrakcija",
-          sampleData
+          sampleData,
+          config // Dodajemo config s tokenom
         );
         console.log(response.data);
         this.showDialog = true;
@@ -215,7 +241,8 @@ export default {
       } catch (error) {
         console.error(error);
       }
-    },
+    }
+
   },
 };
 </script>

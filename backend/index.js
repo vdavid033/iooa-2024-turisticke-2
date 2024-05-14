@@ -7,13 +7,14 @@ const app = express();
 var cors = require('cors')
 var bodyParser = require('body-parser');
 //const conn=require('./connection')
-const axios = require('axios');
+const jwt = require('jsonwebtoken');
+const config = require("./auth.config.js");
+const authJwt = require("./authJwt.js");
+
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json());
 const dbConfig = require("./dbConfig");
-const bcrypt = require('bcrypt');
-const jwt = require('jwt-simple');
 
 app.use(cors());
 //const cors = require('cors');
@@ -46,92 +47,42 @@ app.use(function (req, res, next) {
 });
 // kraj fix-a
 
-// Definiranje rute za registraciju korisnika
 
+app.post('/unosAtrakcija', authJwt.verifyToken("admin, korisnik"), function (request, response) {
+  const data = request.body;
 
+  // Pripremamo niz s atributima atrakcije, uključujući id_korisnika
+  const atrakcija = [
+    [
+      data.naziv,
+      data.opis,
+      data.slika,
+      data.prosjecna_ocjena || null, // Pretpostavimo da prosječna ocjena može biti null
+      data.geografska_duzina,
+      data.geografska_sirina,
+      data.adresa,
+      data.id_korisnika // Koristimo ID korisnika koji dolazi iz zahtjeva
+    ]
+  ];
 
-const saltRounds = 10;
-
-app.post('/register', (req, res) => {
-  const { email, password } = req.body;
-  const uloga = 'korisnik';  // Postavljanje default vrijednosti 'korisnik' za uloga
-
-  // Prvo provjeravamo postoji li već korisnik s istim emailom
-  dbConn.query('SELECT email FROM users WHERE email = ?', [email], (error, results, fields) => {
-    if (error) {
-      console.error("Database error:", error);
-      return res.status(500).send({ status: 'error', message: 'Greška prilikom provjere emaila.', error: error.sqlMessage });
-    }
-
-    if (results.length > 0) {
-      // Ako korisnik već postoji, šaljemo poruku o grešci
-      return res.status(409).send({ status: 'error', message: 'Email adresa je već registrirana.' });
-    } else {
-      // Ako korisnik ne postoji, hashiramo lozinku
-      bcrypt.hash(password, saltRounds, function (err, hashedPassword) {
-        if (err) {
-          console.error("Error hashing password:", err);
-          return res.status(500).send({ status: 'error', message: 'Greška prilikom hashiranja lozinke.', error: err.message });
-        }
-
-        // Upisujemo novog korisnika u bazu
-        dbConn.query('INSERT INTO users (email, password, uloga) VALUES (?, ?, ?)',
-          [email, hashedPassword, uloga], (error, results, fields) => {
-            if (error) {
-              console.error("Database error:", error);
-              res.status(500).send({ status: 'error', message: 'Greška prilikom registracije.', error: error.sqlMessage });
-            } else {
-              res.send({ status: 'success', message: 'Uspješna registracija' });
-            }
-          });
-      });
-    }
-  });
-});
-// Dodajemo endpoint za prijavu
-app.post("/prijavi", function (req, res) {
-  const { email, password } = req.body;
-
+  // SQL upit koji uključuje id_korisnika
   dbConn.query(
-    "SELECT * FROM `users` WHERE `email` = ?",
-    [email],
-    function (error, results) {
+    'INSERT INTO atrakcije (naziv, opis, slika, prosjecna_ocjena, geografska_duzina, geografska_sirina, adresa, id_korisnika) VALUES ?',
+    [atrakcija],
+    function (error, results, fields) {
       if (error) {
-        console.error("Error logging in:", error);
-        return res.status(501).send({ error: true, message: "Problem prilikom prijave.", detailedError: error.sqlMessage });
+        console.error('Error inserting attraction:', error);
+        return response.status(500).send({ error: true, message: 'Došlo je do pogreške prilikom unosa atrakcije.' });
       }
-      if (results.length > 0) {
-        bcrypt.compare(password, results[0].password, function (err, isMatch) {
-          if (err) {
-            console.error("Error comparing password:", err);
-            console.log(password);
-            console.log(results[0].password);
-            return res.status(500).send({ error: true, message: "Problem prilikom provjere lozinke.", detailedError: err.message });
-          }
-          if (isMatch) {
-            const token = jwt.sign({ id: results[0].id, uloga: results[0].uloga }, config.secret, { expiresIn: '24h' });
-            res.status(200).json({ success: true, message: "Login successful", token: token });
-          } else {
-            res.status(401).send({ success: false, message: 'Neispravno korisničko ime ili password.' });
-          }
-        });
-      } else {
-        res.status(404).send({ success: false, message: 'Korisničko ime nije pronađeno.' });
-      }
+
+      return response.send({ error: false, data: results, message: 'Atrakcija uspješno unesena.' });
     }
   );
 });
 
-app.post('/unosAtrakcija', function (request, response) {
-  const data = request.body;
-  atrakcija = [[data.naziv, data.opis, data.slika, data.prosjecna_ocjena, data.geografska_duzina, data.geografska_sirina, data.adresa]]
 
-  dbConn.query('INSERT INTO atrakcije (naziv, opis, slika, prosjecna_ocjena, geografska_duzina, geografska_sirina, adresa ) VALUES ? ',
-    [atrakcija], function (error, results, fields) {
-      if (error) throw error;
-      return response.send({ error: false, data: results, message: 'Atrakcija unesena.' });
-    });
-});
+
+
 app.post('/dodavanje_slike', function (request, response) {
   const data = request.body;
   slika = [[data.id_atrakcije_s, data.slika_s]]
@@ -169,7 +120,58 @@ app.post("/api/unos-slike", function (req, res) {
 
 //uzimanje podataka o atrakcijama
 app.get('/atrakcije', (req, res) => {
-  dbConn.query("select * from atrakcije", (err, result) => {
+  const idKorisnika = req.query.id_korisnika;
+  console.log("id korisnika: " + idKorisnika);
+  if (!idKorisnika) {
+    return res.status(400).send({ error: 'ID korisnika je potreban' });
+  }
+
+  dbConn.query("SELECT * FROM atrakcije WHERE id_korisnika = ?", [idKorisnika], (err, result) => {
+    if (err) {
+      res.status(500).send('Error in fetching attractions');
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+
+app.get('/atrakcije/:id', (req, res) => {
+  const { id } = req.params;
+  const idKorisnika = req.query.id_korisnika;
+  console.log("Request received for ID:", req.params.id);
+  console.log("Request received for ID korisnika:", req.query.id_korisnika);
+
+
+  if (!idKorisnika) {
+    return res.status(400).send({ error: 'ID korisnika je potreban' });
+  }
+
+  dbConn.query("SELECT * FROM atrakcije WHERE id_atrakcije = ? ", [id], (err, result) => {
+    if (err) {
+      return res.status(500).send('Error in fetching attraction');
+    }
+    if (result.length === 0) {
+      return res.status(404).send('Attraction not found');
+    }
+    res.send(result[0]); // Assuming the query returns an array
+  });
+});
+
+
+app.get('/slike', (req, res) => {
+  dbConn.query("select * from slike", (err, result) => {
+    if (err) {
+      res.send('error');
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+//uzimanje podataka o atrakcijama
+app.get('/sveatrakcije', (req, res) => {
+  dbConn.query("SELECT * FROM atrakcije ", (err, result) => {
     if (err) {
       res.send('error');
     } else {
@@ -186,6 +188,7 @@ app.get('/slike', (req, res) => {
     }
   });
 });
+
 /// uzimanje podataka o komentarima
 app.get("/komentari", function (request, response) {
   dbConn.query("SELECT * FROM Komentari", function (error, results, fields) {
@@ -212,9 +215,22 @@ app.get('/komentari/:id', function (request, response) {
 });
 // Dodavanje komentara za atrakciju po ID-u
 
-app.post('/dodajKomentar/:id', (req, res) => {
+app.post('/dodajKomentar/:id', authJwt.verifyToken("admin,korisnik"), (req, res) => {
   const data = [req.body.Komentar, req.params.id]
   dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", data, (err, result) => {
+    if (err) {
+      res.send('Error')
+    } else {
+      res.send(result)
+    }
+  })
+});
+
+
+//registracija korisnika
+app.post('/dodajKorisnika', (req, res) => {
+  const data = [req.body.Komentar, req.params.id]
+  dbConn.query("INSERT INTO users ( email, password) VALUES (?,?)", data, (err, result) => {
     if (err) {
       res.send('Error')
     } else {
@@ -239,24 +255,7 @@ app.get("/korisnici", function (request, response) {
 
 
 
-app.get('/atrakcije/:id', function (request, response) {
-  let id_atrakcije = request.params.id;
-  if (!id_atrakcije) {
-    return response.status(400).send({
-      error: true,
 
-      message: 'Unesite id_atrakcije'
-    });
-  }
-  dbConn.query('SELECT * FROM atrakcije where id_atrakcije=?', id_atrakcije, function
-    (error, results, fields) {
-    if (error) throw error;
-    return response.send({
-      data: results[0]
-
-    });
-  });
-});
 
 
 /*
@@ -275,30 +274,58 @@ app.delete('/atrakcije/id', function (request, response) {
 });*/
 
 
-app.delete('/obrisi_atrakcije/:id', function (request, response) {
 
+app.delete('/obrisi_atrakcije/:id_atrakcije', function (request, response) {
+  const id_atrakcije = request.params.id_atrakcije;
+  const id_korisnika = request.query.id_korisnika;
+  const uloga = request.query.uloga;
 
-  let id_atrakcije = request.params.id;
+  console.log(`Received request to delete atrakcija with id: ${id_atrakcije} by user: ${id_korisnika}, role: ${uloga}`);
 
-  console.log(`Received request to delete atrakcija with id: ${id_atrakcije}`); // Log the received id
-
-  if (!id_atrakcije) {
-    return response.status(400).send({ error: true, message: 'nedostaje id atrakcije' });
+  if (!id_atrakcije || (!id_korisnika && uloga !== 'admin')) {
+    return response.status(400).send({ error: true, message: 'Missing id_atrakcije or id_korisnika' });
   }
 
-  const deleteQuery = "DELETE  FROM atrakcije WHERE id_atrakcije = ?";
-  //const deleteQuery = "DELETE  FROM atrakcije WHERE id_atrakcije = '${id}'";
-  dbConn.query(deleteQuery, [id_atrakcije], function (error, results) {
-    if (error) {
-      console.log(`Error when executing the delete query: ${error}`); // Log any error from the query
-      throw error;
-    }
+  if (uloga === 'admin') {
+    // Admin case: bypass user check and delete any attraction by id
+    const adminDeleteQuery = "DELETE FROM atrakcije WHERE id_atrakcije = ?";
+    dbConn.query(adminDeleteQuery, [id_atrakcije], function (error, deleteResults) {
+      if (error) {
+        console.log(`Error when executing the admin delete query: ${error}`);
+        return response.status(500).send({ error: true, message: 'Error deleting attraction' });
+      }
 
-    console.log('Deletion result: ${JSON.stringify(results)}'); // Log the result of the deletion
+      console.log(`Admin deletion result: ${JSON.stringify(deleteResults)}`);
+      return response.send({ error: false, data: deleteResults, message: 'Atrakcija je obrisana by admin.' });
+    });
+  } else {
+    // Regular user case: ensure the user is authorized to delete the attraction
+    const selectQuery = "SELECT * FROM atrakcije WHERE id_atrakcije = ? AND id_korisnika = ?";
+    dbConn.query(selectQuery, [id_atrakcije, id_korisnika], function (error, results) {
+      if (error) {
+        console.log(`Error fetching data: ${error}`);
+        return response.status(500).send({ error: true, message: 'Error retrieving attraction' });
+      }
 
-    return response.send({ error: false, data: results, message: 'atrakcija je obrisana obrisi_atrakcije.' });
-  });
+      if (results.length === 0) {
+        return response.status(403).send({ error: true, message: 'User not authorized to delete this attraction' });
+      }
+
+      const deleteQuery = "DELETE FROM atrakcije WHERE id_atrakcije = ? AND id_korisnika = ?";
+      dbConn.query(deleteQuery, [id_atrakcije, id_korisnika], function (error, deleteResults) {
+        if (error) {
+          console.log(`Error when executing the user delete query: ${error}`);
+          return response.status(500).send({ error: true, message: 'Error deleting attraction' });
+        }
+
+        console.log(`User deletion result: ${JSON.stringify(deleteResults)}`);
+        return response.send({ error: false, data: deleteResults, message: 'Atrakcija je obrisana by user.' });
+      });
+    });
+  }
 });
+
+
 
 // Dodavanje ocjene za atrakciju
 
@@ -493,4 +520,69 @@ app.listen(4200, function () {
 });
 //module.exports = app;
 
+
+
+
+// API endpoint za spremanje emaila i lozinke
+app.post('/register', (req, res) => {
+  const { korisnicko_ime, lozinka } = req.body;
+  const uloga = 'korisnik';  // Postavljanje default vrijednosti 'korisnik' za uloga
+
+  // Prvo hashiramo lozinku
+  bcrypt.hash(lozinka, saltRounds, function (err, hashedPassword) {
+    if (err) {
+      console.error("Error hashing password:", err);
+      return res.status(500).send({ status: 'error', message: 'Greška prilikom hashiranja lozinke.', error: err.message });
+    }
+
+    // Ako nema greške, nastavljamo s upisom u bazu
+    dbConn.query('INSERT INTO users (korisnicko_ime, lozinka, uloga) VALUES (?, ?, ?)',
+      [korisnicko_ime, hashedPassword, uloga], (error, results, fields) => {
+        if (error) {
+          console.error("Database error:", error);
+          res.status(500).send({ status: 'error', message: 'Greška prilikom registracije.', error: error.sqlMessage });
+        } else {
+          res.send({ status: 'success', message: 'Uspješna registracija' });
+        }
+      });
+  });
+});
+
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+
+// Dodajemo endpoint za prijavu
+app.post("/prijavi", function (req, res) {
+  const { korisnicko_ime, lozinka } = req.body;
+
+  dbConn.query(
+    "SELECT * FROM `users` WHERE `korisnicko_ime` = ?",
+    [korisnicko_ime],
+    function (error, results) {
+      if (error) {
+        console.error("Error logging in:", error);
+        return res.status(501).send({ error: true, message: "Problem prilikom prijave.", detailedError: error.sqlMessage });
+      }
+      if (results.length > 0) {
+        bcrypt.compare(lozinka, results[0].lozinka, function (err, isMatch) {
+          if (err) {
+            console.error("Error comparing password:", err);
+            console.log(lozinka);
+            console.log(results[0].lozinka);
+            return res.status(500).send({ error: true, message: "Problem prilikom provjere lozinke.", detailedError: err.message });
+          }
+          if (isMatch) {
+            const token = jwt.sign({ id: results[0].id_korisnika, uloga: results[0].uloga }, config.secret, { expiresIn: '24h' });
+            res.status(200).json({ success: true, message: "Login successful", token: token });
+          } else {
+            res.status(401).send({ success: false, message: 'Neispravno korisničko ime ili lozinka.' });
+          }
+        });
+      } else {
+        res.status(404).send({ success: false, message: 'Korisničko ime nije pronađeno.' });
+      }
+    }
+  );
+});
 

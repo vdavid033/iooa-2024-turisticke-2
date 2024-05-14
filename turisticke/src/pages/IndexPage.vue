@@ -1,272 +1,87 @@
 <template>
-  <div style="background-color: #69b6f0">
-    <div class="q-pa-md row items-start q-gutter-md">
-      <br>
-      <!-- DMA: Kod za filter box -->
-      <!-- treba ga smjestiti bolje, čudno izgleda xD -->
-      <q-input
-        v-model="searchTerm"
-        outlined
-        dense
-        placeholder="Pretražite atrakcije po nazivu..."
-        @keyup.enter="search"
-        class="my-search-bar"/>
-      <br>
-      <!-- Originalni kod -->
-      <q-card v-for="post in posts" :key="post.id" class="my-card">
-        <q-img :src="post.slika" />
-
-        <q-card-section>
-          <q-btn
-            fab
-            color="primary"
-            icon="place"
-            class="absolute"
-            style="top: 0; right: 12px; transform: translateY(-50%)"
-            :to="'/one_atraction/' + post.id_atrakcije"
-          />
-
-          <q-btn
-            fab
-            color="red"
-            icon="delete"
-            class="absolute"
-            style="top: 0px; left: 12px; transform: translateY(-50%)"
-            @click="deleteById(post.id_atrakcije)"
-          />
-
-          <div class="myDiv" style="padding: 10px"></div>
-
-          <div class="row no-wrap items-center">
-            <div class="col text-h6 ellipsis">{{ post.naziv }}</div>
-          </div>
-
-          <q-rating
-            v-model="post.prosjecna_ocjena"
-            :max="5"
-            :readonly="true"
-            size="32px"
-          />
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <div class="text-subtitle1">{{ post.adresa }}</div>
-          <div class="text-caption text-grey">
-            {{ post.opis }}
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <div>
-            <div>
-              <div v-for="pic in pics" :key="pic.id_atrakcije_s">
-                <q-img v-if="pic.id_atrakcije_s === post.id_atrakcije" :src="pic.slika_s" />
-              </div>
-            </div>
-            <input type="file" @change="onFileChange" />
-
-            <q-btn @click="convertImage">Spremi sliku</q-btn>
-            <q-separator></q-separator>
-            <div v-if="base64Image">
-              <img :src="base64Image" />
-              <q-separator></q-separator>
-
-              <div
-                class="q-pa-sm"
-                style="max-width: 700px; overflow-wrap: break-word"
-              ></div>
-            </div>
-          </div>
-          <div class="row justify-center q-pa-md">
-            <div class="row justify-center q-pa-md">
-              <q-btn
-                label="Unesi"
-                @click="submitForm(post.id_atrakcije)"
-                color="blue"
-                class="q-ml-sm"
-              />
-            </div>
-          </div>
-          <q-dialog v-model="showDialog">
-            <q-card>
-              <q-card-section> Slika je uspješno dodana! </q-card-section>
-              <q-card-actions align="right">
-                <q-btn
-                  flat
-                  label="Ok"
-                  color="primary"
-                  v-close-popup
-                  @click="closeAndReload"
-                />
-              </q-card-actions>
-            </q-card>
-          </q-dialog>
-        </q-card-section>
-      </q-card>
+  <div class="q-pa-md row items-start q-gutter-md bg-blue">
+    <!-- Sorting buttons with improved aesthetics -->
+    <div class="row justify-center q-pa-md">
+      <q-btn label="Sortiraj uzlazno" @click="sortPostsAsc" color="light-blue" class="q-mr-sm" />
+      <q-btn label="Sortiraj silazno" @click="sortPostsDesc" color="amber" />
     </div>
 
+    <!-- Attraction cards -->
+    <q-card v-for="post in posts" :key="post.id" class="my-card">
+      <q-img :src="post.slika" />
 
+      <q-card-section>
+        <q-btn fab icon="place" class="absolute top-right" :to="'/one_atraction/' + post.id_atrakcije" />
+        <q-btn fab icon="delete" color="red" class="absolute top-left" @click="deleteById(post.id_atrakcije)" />
+        <div class="text-h6">{{ post.naziv }}</div>
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <div class="text-subtitle1">{{ post.adresa }}</div>
+        <div class="text-caption text-grey">{{ post.opis }}</div>
+        <q-rating v-model="post.prosjecna_ocjena" :max="5" :readonly="true" size="32px" />
+      </q-card-section>
+    </q-card>
   </div>
 </template>
+
 <script>
-// eslint-disable-next-line no-unused-vars
-import { QDialog } from "quasar";
-import { isProxy, toRaw } from 'vue';
-import imageCompression from "browser-image-compression";
-// eslint-disable-next-line no-unused-vars
-import axios from "axios"; // Import axios
-export default {
-  data() {
-    return {
-      inputIdAtrakcije: "",
-      inputSlika: null,
-      slike: [],
-    };
-  },
-  methods: {
-    async onFileChange(e) {
-      this.file = e.target.files[0];
-      await this.convertImage();
-    },
-    async convertImage() {
-      if (!this.file && !this.imageUrl) {
-        return alert("Molimo odaberite sliku ili unesite URL slike.");
-      }
-
-      const options = {
-        maxSizeMB: 1, // Maximum file size in MB
-        maxWidthOrHeight: 1920, // Maximum width or height, whichever is smaller
-        useWebWorker: true,
-      };
-
-      try {
-        let compressedFile;
-
-        if (this.imageUrl) {
-          const response = await fetch(this.imageUrl);
-          const blob = await response.blob();
-          compressedFile = await imageCompression(blob, options);
-        } else {
-          compressedFile = await imageCompression(this.file, options);
-        }
-
-        const reader = new FileReader();
-        reader.readAsDataURL(compressedFile);
-        reader.onload = () => {
-          this.base64Image = reader.result;
-          this.base64Text = reader.result.replace(
-            /^data:image\/[a-z]+;base64,/,
-            ""
-          );
-          this.inputSlika = "data:image/jpg;base64," + this.base64Text;
-        };
-        reader.onerror = (error) => {
-          console.error(error);
-        };
-        b;
-      } catch (error) {
-        console.error(error);
-        return alert("Došlo je do pogreške prilikom kompresije slike.");
-      }
-    },
-    closeAndReload() {
-      this.showDialog = false;
-      window.location.reload();
-    },
-
-    onFileSelected(event) {
-      this.inputSlika = event.target.files[0];
-    },
-    onUpload() {
-      axios.post;
-    },
-    resetForm() {
-      (this.inputIdAtrakcije = ""), (this.inputSlika = "");
-      this.$refs.slikaRef.resetValidation();
-      this.$refs.IdAtrakcijeRef.resetValidation();
-    },
-    async submitForm(num) {
-      const sampleData = {
-        id_atrakcije_s: num,
-        slika_s: this.inputSlika,
-      };
-      try {
-        const response = await axios.post(
-          "http://localhost:4200/dodavanje_slike",
-          sampleData
-        );
-        console.log(response.data);
-        this.showDialog = true;
-        this.resetForm();
-      } catch (error) {
-        console.error(error);
-      }
-    },
-  },
-};
-</script>
-<script setup>
 import { ref, onMounted } from "vue";
 import { api } from "boot/axios";
+import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
 
-const posts = ref([]);
-const pics = ref([]);
+export default {
+  setup() {
+    const posts = ref([]);
 
-const getPosts = async () => {
-  try {
-    const response = await api.get("atrakcije");
-    const response2 = await api.get("slike");
-    console.log(response.data);
-    console.log(response2.data);
-    posts.value = response.data;
-    pics.value = response2.data;
-  } catch (error) {
-    console.log(error);
-  }
+    const getPosts = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return console.error('Token not found. Please log in.');
+
+      const decodedToken = jwtDecode(token);
+      const id_korisnika = decodedToken.id;
+      if (!id_korisnika) return console.error('User ID missing in the token.');
+
+      try {
+        const response = await api.get(`atrakcije?id_korisnika=${id_korisnika}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        posts.value = response.data;
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    const sortPostsAsc = () => posts.value.sort((a, b) => a.prosjecna_ocjena - b.prosjecna_ocjena);
+    const sortPostsDesc = () => posts.value.sort((a, b) => b.prosjecna_ocjena - a.prosjecna_ocjena);
+
+    const deleteById = async (id_atrakcije) => {
+      const token = localStorage.getItem("token");
+      if (!token) return console.error("Token not found. Please log in.");
+
+      const decodedToken = jwtDecode(token);
+      const id_korisnika = decodedToken.id, uloga = decodedToken.uloga;
+
+      try {
+        await api.delete(`obrisi_atrakcije/${id_atrakcije}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { id_korisnika, uloga }
+        });
+        getPosts();
+      } catch (error) {
+        console.error("Failed to delete post:", error);
+      }
+    };
+
+    onMounted(getPosts);
+    return { posts, sortPostsAsc, sortPostsDesc, deleteById };
+  },
 };
-
-const deleteById = async (id) => {
-  try {
-    //const response = await api.delete('atrakcije/${id}');
-    const response = await api.delete(
-      `http://localhost:4200/obrisi_atrakcije/${id}`
-    );
-    console.log(response.data);
-    // Perform any additional actions after successful deletion
-  } catch (error) {
-    console.log(error);
-  }
-  getPosts();
-};
-
-
-
-///////////////////////////////
-onMounted(() => {
-  getPosts();
-});
-const goToAtrakcijeDetalji = (id) => {
-  router.push({
-    name: "one_atraction",
-    params: {
-      id: id,
-    },
-  });
-};
-// DMA filtar kod pokušaj. Stranica se izgubi kad je aktivan.
-//Search filtar za naziv
-/*const search = () => {
-  filteredPosts.value = posts.value.filter(
-      (post) => post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()));
-};
-const filteredPosts = computed(() => {
-  return posts.value.filter(post => post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()));
-});
-*/
 </script>
 
 <style>
 .bg-blue {
-  background-color: #1e90ff;
+  background-color: #1e90ff; /* Lighter blue background */
   color: white;
 }
 
@@ -275,11 +90,13 @@ const filteredPosts = computed(() => {
   max-width: 300px;
 }
 
-.my-search-bar {
-  margin-bottom: 10px;
-  margin-left: 20px;
-  background-color: #ffffff9d;
-  width:40%;
-  border-radius: 10px;
+.top-right {
+  top: 0; right: 12px;
+  transform: translateY(-50%);
+}
+
+.top-left {
+  top: 0; left: 12px;
+  transform: translateY(-50%);
 }
 </style>

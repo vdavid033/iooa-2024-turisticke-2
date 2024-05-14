@@ -7,15 +7,18 @@
         <q-toolbar-title>
           <div class="text-h6"><b>Turističke atrakcije</b></div>
         </q-toolbar-title>
+        <q-toolbar-title>
+          <div class="text-h6"><b> </b>{{ userRole }}</div>
+        </q-toolbar-title>
 
-        <div>Bad Developers</div>
+        <!-- Display Logout button only if user is logged in -->
+        <q-btn v-if="isUserLoggedIn" flat icon="logout" label="ODJAVA" @click="clearLocalStorage" />
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header> Izbornik </q-item-label>
-
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>
@@ -27,8 +30,9 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
 
 const linksList = [
   {
@@ -38,61 +42,63 @@ const linksList = [
     target: "_self",
   },
   {
-    title: "Moje atrakcije",
-    caption: "popis mojih atrakcija",
+    title: "Sve atrakcije",
+    caption: "popis svih atrakcija",
     icon: "favorite",
     link: "/",
     target: "_self",
   },
   {
-    title: "Unos atrakcija",
-    caption: "nos novih atrakcija",
-    icon: "swap_horizontal_circle",
-    link: "unos",
+    title: "Moje atrakcije",
+    caption: "popis mojih atrakcija",
+    icon: "favorite",
+    link: "/index",
     target: "_self",
   },
   {
-    title: "Testiranje Axiosa",
-    caption: "služi za testiranje Axiosa",
+    title: "Unos atrakcija",
+    caption: "unos novih atrakcija",
     icon: "swap_horizontal_circle",
-    link: "axo",
+    link: "unos",
     target: "_self",
-  },
-  // {
-  //   title: "",
-  //   caption: "forum.quasar.dev",
-  //   icon: "record_voice_over",
-  //   link: "https://forum.quasar.dev",
-  // },
-  // {
-  //   title: "",
-  //   caption: "@quasarframework",
-  //   icon: "rss_feed",
-  //   link: "https://twitter.quasar.dev",
-  // },
-  // {
-  //   title: "",
-  //   caption: "@QuasarFramework",
-  //   icon: "public",
-  //   link: "https://facebook.quasar.dev",
-  // },
-  // {
-  //   title: "",
-  //   caption: "Community Quasar projects",
-  //   icon: "favorite",
-  //   link: "https://awesome.quasar.dev",
-  // },
+  }
 ];
 
 export default defineComponent({
   name: "MainLayout",
-
   components: {
     EssentialLink,
   },
 
   setup() {
     const leftDrawerOpen = ref(false);
+    const userRole = ref(""); // Ref to store user role
+    const isUserLoggedIn = ref(false); // Ref to track user login status
+
+    function clearLocalStorage() {
+      localStorage.clear();
+      window.location.reload();
+      console.log("Local storage is cleared."); // Optional: Log message to console
+    }
+
+    function getUserRole() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        isUserLoggedIn.value = true; // Set user login status to true
+        try {
+          const decoded = jwtDecode(token);
+          userRole.value = decoded.uloga; // Set user role
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          userRole.value = "Niste prijavljeni"; // If there's an error decoding token
+        }
+      } else {
+        userRole.value = "Niste prijavljeni"; // If token doesn't exist
+      }
+    }
+
+    // Refresh user role on component initialization
+    onMounted(getUserRole);
 
     return {
       essentialLinks: linksList,
@@ -100,6 +106,9 @@ export default defineComponent({
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
+      clearLocalStorage,
+      userRole, // Available in the template
+      isUserLoggedIn // Available in the template
     };
   },
 });
