@@ -168,7 +168,6 @@ export default {
         b;
       } catch (error) {
         console.error(error);
-        return alert("Došlo je do pogreške prilikom kompresije slike.");
       }
     },
 
