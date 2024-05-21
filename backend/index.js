@@ -183,29 +183,21 @@ app.get('/slike', (req, res) => {
   });
 });
 
-/// uzimanje podataka o komentarima
-app.get("/komentari", (request, response) => {
-  dbConn.query("SELECT * FROM Komentari", (error, results, fields) => {
+
+
+app.get('/prikazikomentari/:id', (req, res) => {
+  let id_atrakcije = req.params.id;
+  dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije = ?", [id_atrakcije], (error, results) => {
     if (error) throw error;
-    return response.send({
+    res.send({
       error: false,
       data: results,
-      message: "lista komentara.",
+      message: "Lista komentara."
     });
   });
 });
 
-app.get('/komentari/:id', (request, response) => {
-  let id_atrakcije = request.params.id;
-  dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije = ?", [id_atrakcije], (error, results, fields) => {
-    if (error) throw error;
-    return response.send({
-      error: false,
-      data: results,
-      message: "lista komentara.",
-    });
-  });
-});
+
 // Dodavanje komentara za atrakciju po ID-u
 
 app.post('/dodajKomentar/:id', (req, res) => {
@@ -261,9 +253,9 @@ app.delete('/atrakcije/id', function (request, response) {
     return response.status(400).send({ error: true, message:
     'nedostaje id atrakcije' });
     }
-    dbConn.query("DELETE * FROM atrakcije WHERE id_atrakcije = ?",[id_atrakcije],
-    function (error, results) {
-    if (error) throw error;
+    dbConn.query("DELETE * FROM atrakcije WHERE id_atrakcije = ?",[id_atrakcije],s) {
+    if (error) throw 
+    function (error, resulterror;
     return response.send({ error: false, data: results, message:
     'atrakcija je obrisana.' });
     });

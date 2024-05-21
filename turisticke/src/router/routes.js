@@ -10,7 +10,7 @@ const routes = [
 
     ],
   },
- 
+
   {
     path: "/auth",
     component: () => import("layouts/BlankLayout.vue"),
@@ -19,7 +19,7 @@ const routes = [
     ],
   },
 
- 
+
 
   {
     path: "/registracijaputanja",
@@ -44,8 +44,8 @@ const routes = [
     path: "/one_atraction",
     component: () => import("layouts/BlankLayout.vue"),
     children: [
-      {name: "one_atraction", path: ":id", component: () => import("pages/AtrakcijePage.vue") },
-
+      { name: "one_atraction", path: ":id", component: () => import("pages/AtrakcijePage.vue") },
+      { name: "comments", path: ":id/komentari", component: () => import("components/CommentsSection.vue") },
     ],
   },
   {
