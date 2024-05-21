@@ -1,2 +1,1 @@
-Valentino Denona
-Niko Gospić
+
