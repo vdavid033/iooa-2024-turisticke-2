@@ -1,0 +1,23 @@
+Koraci za preuzimanje projekta s GitHub-a i pokretanje:
+1. Preuzimanje projekta
+Otvori terminal.
+Navigiraj do direktorija u kojem želiš preuzeti projekt.
+Izvrši sljedeću naredbu kako bi preuzeo projekt sa GitHub-a:
+git clone https://github.com/vdavid033/iooa-2024-turisticke-2.git
+Ova naredba će preuzeti cijeli projekat s GitHub-a i spremiti ga u direktorij iooa-2024-turisticke-2 u trenutnom direktoriju.
+
+2. Pokretanje backend servera
+Navigiraj do direktorija iooa-2024-turisticke-2/backend.
+Instaliraj zavisnosti pokretanjem sljedeće naredbe:
+npm install
+Pokreni backend server naredbom:
+node index.js
+3. Pokretanje frontend aplikacije
+Navigiraj do direktorija iooa-2024-turisticke-2/frontend.
+Instaliraj zavisnosti pokretanjem  naredbe:
+npm install
+Pokreni frontend aplikaciju naredbom:
+quasar dev
+4. Pristupanje aplikaciji
+Nakon pokretanja ukoliko se aplikacija sama ne otvori, otvori web preglednik.
+Upiši URL adresu http://localhost:9000/
