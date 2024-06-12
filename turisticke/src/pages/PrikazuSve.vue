@@ -1,11 +1,20 @@
 <template>
   <div style="background-color: #229df9">
+    <q-input
+      v-model="searchTerm"
+      outlined
+      dense
+      placeholder="Pretražite atrakcije po nazivu..."
+      @keyup.enter="search"
+      class="my-search-bar"
+    />
     <div class="q-pa-md row items-start q-gutter-md">
-      <!-- Gumbi za sortiranje -->
-     
-
       <!-- Kartice atrakcija -->
-      <q-card v-for="post in posts" :key="post.id" class="my-card">
+      <q-card
+        v-for="post in filteredPosts"
+        :key="post.id"
+        class="my-card"
+      >
         <q-img :src="post.slika" />
 
         <q-card-section>
@@ -49,17 +58,22 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <template v-if="filteredPosts.length === 0">
+      <div class="text-caption text-grey">Nije moguće pronaći traženi naslov</div>
+    </template>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { api } from "boot/axios";
-import { jwtDecode   } from "jwt-decode"; // Assume this library is already installed
+import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
 
 export default {
   setup() {
     const posts = ref([]);
+    const searchTerm = ref("");
 
     const getPosts = async () => {
       try {
@@ -69,15 +83,6 @@ export default {
         console.error(error);
       }
     };
-
-    const sortPostsAsc = () => {
-      posts.value.sort((a, b) => a.prosjecna_ocjena - b.prosjecna_ocjena);
-    };
-
-    const sortPostsDesc = () => {
-      posts.value.sort((a, b) => b.prosjecna_ocjena - a.prosjecna_ocjena);
-    };
-
 
     const deleteById = async (id_atrakcije) => {
       try {
@@ -89,17 +94,17 @@ export default {
 
         // Decode the JWT token to get user details
         const decodedToken = jwtDecode(token);
-        const id_korisnika = decodedToken.id
-        const uloga = decodedToken.uloga
+        const id_korisnika = decodedToken.id;
+        const uloga = decodedToken.uloga;
 
         const config = {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
           params: {
             id_korisnika, // Pass the user ID to the backend
-            uloga
-          }
+            uloga,
+          },
         };
 
         const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id_atrakcije}`, config);
@@ -109,10 +114,24 @@ export default {
       }
     };
 
+    const search = () => {
+  filteredPosts.value = posts.value.filter((post) =>
+    post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+    post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
+  );
+};
 
-    onMounted(getPosts);
+onMounted(getPosts);
 
-    return { posts, sortPostsAsc, sortPostsDesc, deleteById };
+const filteredPosts = computed(() => {
+  return posts.value.filter((post) =>
+    post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+    post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
+  );
+});
+
+
+    return { posts, searchTerm, search, filteredPosts, deleteById };
   },
 };
 </script>
@@ -126,5 +145,13 @@ export default {
 .my-card {
   width: 100%;
   max-width: 300px;
+}
+
+.my-search-bar {
+  margin-bottom: 10px;
+  margin-left: 20px;
+  background-color: #ffffff9d;
+  width: 40%;
+  border-radius: 10px;
 }
 </style>
