@@ -13,7 +13,7 @@ npm install
 Pokreni backend server naredbom:
 node index.js
 3. Pokretanje frontend aplikacije
-Navigiraj do direktorija iooa-2024-turisticke-2/frontend.
+Navigiraj do direktorija iooa-2024-turisticke-2/frontend. (turisticke)
 Instaliraj zavisnosti pokretanjem  naredbe:
 npm install
 Pokreni frontend aplikaciju naredbom:
