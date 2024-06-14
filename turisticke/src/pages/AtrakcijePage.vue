@@ -1,5 +1,5 @@
 <template>
-  <div style="background-color: #229df9; padding: 20px; border-radius: 10px;">
+  <div style="background-color: yellow; padding: 20px; border-radius: 10px;">
     <!-- Main content section -->
     <div v-for="post in posts" :key="post.id" class="row q-pa-md">
       <div q-card>

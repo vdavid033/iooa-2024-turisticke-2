@@ -1,7 +1,7 @@
 <template>
   <div class="registration-form">
     <h2 class="form-title">Registracija</h2>
-    <input type="text" v-model="korisnicko_ime" placeholder="Korisničko ime" class="input-field">
+    <input type="text" v-model="korisnicko_ime" placeholder="Korisničko ime (mora sadržavati @)" class="input-field">
     <input type="password" v-model="lozinka" placeholder="Lozinka" class="input-field">
     <button @click="register" class="submit-btn">Registriraj se</button>
     <router-link to="/" class="link-btn">Odustani</router-link>
@@ -20,6 +20,16 @@ export default {
   },
   methods: {
     register() {
+      if (!this.korisnicko_ime.includes('@')) {
+        alert('Korisničko ime mora sadržavati @.');
+        return;
+      }
+
+      if (this.lozinka.length < 6) {
+        alert('Lozinka mora biti minimalno 6 znakova.');
+        return;
+      }
+
       axios.post('http://localhost:4200/register', {
         korisnicko_ime: this.korisnicko_ime,
         lozinka: this.lozinka
@@ -29,7 +39,7 @@ export default {
         this.$router.push('/');
       })
       .catch(error => {
-        console.error('Registration failed:', error);
+        alert(error.response.data.message);
       });
     }
   }
@@ -42,8 +52,8 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%; /* Ensures form takes the full width */
-  height: 100vh; /* Viewport height for centering on screen */
+  width: 100%;
+  height: 100vh;
   background-color: #ffffff;
 }
 
@@ -52,12 +62,12 @@ export default {
 }
 
 .input-field {
-  width: 90%; /* Wider for better mobile experience */
-  max-width: 400px; /* Max width for larger screens */
+  width: 90%;
+  max-width: 400px;
   margin: 10px 0;
   padding: 15px;
   border: 1px solid #ccc;
-  border-radius: 15px; /* Rounded corners for inputs */
+  border-radius: 15px;
 }
 
 .submit-btn, .link-btn {
@@ -65,20 +75,20 @@ export default {
   max-width: 400px;
   padding: 15px;
   margin-top: 10px;
-  background-color: #007bff;
-  color: white;
+  background-color: yellow;
+  color: black;
   border: none;
-  border-radius: 15px; /* Rounded corners for buttons */
+  border-radius: 15px;
   cursor: pointer;
   text-align: center;
-  text-decoration: none; /* Removes underline for router-link */
+  text-decoration: none;
 }
 
 .submit-btn:hover, .link-btn:hover {
-  background-color: #0056b3;
+  background-color: #f0e68c;
 }
 
 .link-btn {
-  display: block; /* Ensures the button is block level to fill width */
+  display: block;
 }
 </style>

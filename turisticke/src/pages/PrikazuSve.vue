@@ -1,5 +1,5 @@
 <template>
-  <div style="background-color: #229df9">
+  <div style="background-color: yellow">
     <q-input
       v-model="searchTerm"
       outlined
@@ -8,14 +8,14 @@
       @keyup.enter="search"
       class="my-search-bar"
     />
-    <div class="q-pa-md row items-start q-gutter-md">
+    <div class="q-pa-md row items-start q-gutter-md my-card-container">
       <!-- Kartice atrakcija -->
       <q-card
         v-for="post in filteredPosts"
         :key="post.id"
         class="my-card"
       >
-        <q-img :src="post.slika" />
+        <q-img :src="post.slika" class="my-card-img"/>
 
         <q-card-section>
           <q-btn
@@ -115,21 +115,20 @@ export default {
     };
 
     const search = () => {
-  filteredPosts.value = posts.value.filter((post) =>
-    post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-    post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
-  );
-};
+      filteredPosts.value = posts.value.filter((post) =>
+        post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+        post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
+      );
+    };
 
-onMounted(getPosts);
+    onMounted(getPosts);
 
-const filteredPosts = computed(() => {
-  return posts.value.filter((post) =>
-    post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-    post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
-  );
-});
-
+    const filteredPosts = computed(() => {
+      return posts.value.filter((post) =>
+        post.naziv.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+        post.opis.toLowerCase().includes(searchTerm.value.toLowerCase())
+      );
+    });
 
     return { posts, searchTerm, search, filteredPosts, deleteById };
   },
@@ -142,16 +141,46 @@ const filteredPosts = computed(() => {
   color: white;
 }
 
+.my-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
 .my-card {
-  width: 100%;
-  max-width: 300px;
+  flex: 1 1 calc(33.3333% - 16px); /* Three cards per row, with some margin */
+  max-width: calc(33.3333% - 16px);
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.my-card-img {
+  height: 200px; /* Set a fixed height for images */
+  object-fit: cover; /* Ensure the image covers the area without distorting */
 }
 
 .my-search-bar {
   margin-bottom: 10px;
   margin-left: 20px;
   background-color: #ffffff9d;
-  width: 40%;
+  width: 50%; /* Increased width */
   border-radius: 10px;
+}
+
+@media (max-width: 1200px) {
+  .my-card {
+    flex: 1 1 calc(50% - 16px); /* Two cards per row */
+    max-width: calc(50% - 16px);
+  }
+}
+
+@media (max-width: 768px) {
+  .my-card {
+    flex: 1 1 100%; /* One card per row */
+    max-width: 100%;
+  }
 }
 </style>

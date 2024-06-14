@@ -1,104 +1,89 @@
 <template>
-  <div class="bg-image">
+  <div class="bg-yellow">
     <q-page padding class="flex flex-center">
       <q-card style="width: 350px">
         <q-card-section>
           <div class="q-gutter-md full-with" style="max-width: 500px">
             <div class="full-with">
               <div class="q-gutter-md" style="max-width: 350px">
-                <p
-                  class="text-h5 text-weight-light text-center"
-                  style="color: #2196f3"
-                >
+                <p class="text-h5 text-weight-light text-center" style="color: #2196f3">
                   Unos nove atrakcije
                 </p>
+
+                <!-- Naziv -->
                 <q-input
                   ref="nazivRef"
                   v-model="inputNaziv"
                   label="Naziv"
                   placeholder="Naziv atrakcije"
-                >
-                </q-input>
+                  :rules="[val => val && val.length >= 2 || 'Naziv mora imati najmanje 2 slova']"
+                ></q-input>
 
+                <!-- Opis -->
                 <q-input
                   ref="opisRef"
                   v-model="inputOpis"
                   label="Opis"
                   placeholder="Opis atrakcije"
-                >
-                </q-input>
+                  :rules="[val => val && val.length > 10 || 'Opis mora imati više od 10 znakova']"
+                ></q-input>
 
+                <!-- Adresa -->
                 <q-input
                   ref="adresaRef"
                   v-model="inputAdresa"
                   label="Adresa"
                   placeholder="Adresa atrakcije"
-                >
-                </q-input>
+                ></q-input>
 
+                <!-- Širina -->
                 <q-input
                   ref="sirinaRef"
                   v-model="inputSirina"
                   label="Širina"
-                  placeholder="Grografska Širina atr"
-                >
-                </q-input>
+                  placeholder="Geografska Širina atr"
+                  type="number"
+                ></q-input>
 
+                <!-- Dužina -->
                 <q-input
                   ref="duzinaRef"
                   v-model="inputDuzina"
                   label="Dužina"
                   placeholder="Geografska dužina atr"
-                >
-                </q-input>
+                  type="number"
+                ></q-input>
 
+                <!-- Upload slike -->
                 <div>
                   <input type="file" @change="onFileChange" />
-
                   <q-btn @click="convertImage">Spremi sliku</q-btn>
                   <q-separator></q-separator>
-                  <div v-if="base64Image">
-                    <img :src="base64Image" />
+                  <div v-if="previewImage">
+                    <img :src="previewImage" style="max-width: 200px; height: auto;" />
                     <q-separator></q-separator>
-
-                    <div
-                      class="q-pa-sm"
-                      style="max-width: 700px; overflow-wrap: break-word"
-                    ></div>
                   </div>
                 </div>
+
               </div>
-              <div
-                class="q-pa-sm"
-                style="max-width: 700px; overflow-wrap: break-word"
-              ></div>
-            </div>
-          </div>
-          <div class="row justify-center q-pa-md">
-            <div class="row justify-center q-pa-md">
-              <q-btn
-                label="Unesi"
-                @click="submitForm"
-                color="blue"
-                class="q-ml-sm"
-              />
             </div>
           </div>
 
+          <!-- Dugme za slanje forme -->
+          <div class="row justify-center q-pa-md">
+            <q-btn label="Unesi" @click="submitForm" color="blue" class="q-ml-sm" />
+          </div>
+
+          <!-- Dijalog za uspješno dodavanje atrakcije -->
           <q-dialog v-model="showDialog">
             <q-card>
               <q-card-section> Atrakcija je uspješno dodana! </q-card-section>
               <q-card-actions align="right">
-                <q-btn
-                  flat
-                  label="Ok"
-                  color="primary"
-                  v-close-popup
-                  @click="closeAndReload"
-                />
+                <q-btn flat label="Ok" color="primary" v-close-popup @click="closeAndReload" />
               </q-card-actions>
             </q-card>
           </q-dialog>
+
         </q-card-section>
       </q-card>
     </q-page>
@@ -106,14 +91,10 @@
 </template>
 
 <script>
-// eslint-disable-next-line no-unused-vars
-import { QDialog } from "quasar";
 import imageCompression from "browser-image-compression";
-import { jwtDecode } from 'jwt-decode'; // Uvoz jwt-decode biblioteke
+import { jwtDecode } from 'jwt-decode';
+import axios from "axios";
 
-// eslint-disable-next-line no-unused-vars
-import { ref } from "vue";
-import axios from "axios"; // Import axios
 export default {
   data() {
     return {
@@ -122,79 +103,54 @@ export default {
       inputDuzina: "",
       inputSirina: "",
       inputAdresa: "",
-      inputSlika: null,
+      file: null,
+      base64Image: "",
+      previewImage: "", // new property for preview image URL
+      showDialog: false
     };
   },
   methods: {
     async onFileChange(e) {
       this.file = e.target.files[0];
-      await this.convertImage();
     },
     async convertImage() {
-      if (!this.file && !this.imageUrl) {
-        return alert("Molimo odaberite sliku ili unesite URL slike.");
+      if (!this.file) {
+        return alert("Molimo odaberite sliku.");
       }
 
       const options = {
-        maxSizeMB: 1, // Maximum file size in MB
-        maxWidthOrHeight: 1920, // Maximum width or height, whichever is smaller
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
         useWebWorker: true,
       };
 
       try {
-        let compressedFile;
-
-        if (this.imageUrl) {
-          const response = await fetch(this.imageUrl);
-          const blob = await response.blob();
-          compressedFile = await imageCompression(blob, options);
-        } else {
-          compressedFile = await imageCompression(this.file, options);
-        }
+        const compressedFile = await imageCompression(this.file, options);
 
         const reader = new FileReader();
         reader.readAsDataURL(compressedFile);
         reader.onload = () => {
-          this.base64Image = reader.result;
-          this.base64Text = reader.result.replace(
-            /^data:image\/[a-z]+;base64,/,
-            ""
-          );
-          this.inputSlika = "data:image/jpg;base64," + this.base64Text;
+          this.base64Image = reader.result; // store compressed image
+          this.previewImage = reader.result; // initially set preview image as compressed image
+
+          // Optionally, create a smaller preview image (e.g., 200px width)
+          const img = new Image();
+          img.src = reader.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 200;
+            canvas.height = (200 / img.width) * img.height;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            this.previewImage = canvas.toDataURL('image/jpeg'); // set scaled preview image
+          };
         };
         reader.onerror = (error) => {
           console.error(error);
         };
-        b;
       } catch (error) {
         console.error(error);
       }
-    },
-
-    closeAndReload() {
-      this.showDialog = false;
-      window.location.reload();
-    },
-
-    onFileSelected(event) {
-      this.inputSlika = event.target.files[0];
-    },
-    onUpload() {
-      axios.post;
-    },
-    resetForm() {
-      this.inputNaziv = "";
-      this.inputOpis = "";
-      this.inputDuzina = "";
-      this.inputSirina = "";
-      this.inputAdresa = "";
-      this.inputSlika = "";
-      this.$refs.slikaRef.resetValidation();
-      this.$refs.nazivRef.resetValidation();
-      this.$refs.opisRef.resetValidation();
-      this.$refs.duzinaRef.resetValidation();
-      this.$refs.sirinaRef.resetValidation();
-      this.$refs.adresaRef.resetValidation();
     },
     async submitForm() {
       const token = localStorage.getItem("token");
@@ -206,7 +162,7 @@ export default {
       let userId;
       try {
         const decoded = jwtDecode(token);
-        userId = decoded.id; // Pretpostavlja se da se ID korisnika nalazi pod ključem 'id_korisnika' u token
+        userId = decoded.id;
       } catch (error) {
         console.error('Error decoding token:', error);
         return;
@@ -215,11 +171,11 @@ export default {
       const sampleData = {
         naziv: this.inputNaziv,
         opis: this.inputOpis,
-        slika: this.inputSlika,
+        slika: this.base64Image,
         geografska_duzina: this.inputDuzina,
         geografska_sirina: this.inputSirina,
         adresa: this.inputAdresa,
-        id_korisnika: userId // Dodajemo pročitani ID korisnika
+        id_korisnika: userId
       };
 
       const config = {
@@ -232,7 +188,7 @@ export default {
         const response = await axios.post(
           "http://localhost:4200/unosAtrakcija",
           sampleData,
-          config // Dodajemo config s tokenom
+          config
         );
         console.log(response.data);
         this.showDialog = true;
@@ -240,14 +196,27 @@ export default {
       } catch (error) {
         console.error(error);
       }
+    },
+    resetForm() {
+      this.inputNaziv = "";
+      this.inputOpis = "";
+      this.inputDuzina = "";
+      this.inputSirina = "";
+      this.inputAdresa = "";
+      this.file = null;
+      this.base64Image = "";
+      this.previewImage = ""; // reset preview image on form reset
+    },
+    closeAndReload() {
+      this.showDialog = false;
+      window.location.reload();
     }
-
-  },
+  }
 };
 </script>
 
 <style>
-.bg-image {
-  background-image: url(https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.williamhortonphotography.com%2Fwp-content%2Fuploads%2F2017%2F09%2FCroatia-Krk-2015-10.jpg&f=1&nofb=1&ipt=374c233d6e256918b9237640e1c0d6b6d0d4a377be4c7dfc38405cba259d2566&ipo=images);
+.bg-yellow {
+  background-color: yellow;
 }
 </style>

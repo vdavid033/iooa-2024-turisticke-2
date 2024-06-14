@@ -1,11 +1,5 @@
 <template>
-  <div class="q-pa-md row items-start q-gutter-md bg-blue">
-    <!-- Sorting buttons with improved aesthetics -->
-    <div class="row justify-center q-pa-md">
-      <q-btn label="Sortiraj uzlazno" @click="sortPostsAsc" color="light-blue" class="q-mr-sm" />
-      <q-btn label="Sortiraj silazno" @click="sortPostsDesc" color="amber" />
-    </div>
-
+  <div class="q-pa-md row items-start q-gutter-md bg-yellow">
     <!-- Attraction cards -->
     <q-card v-for="post in posts" :key="post.id" class="my-card">
       <q-img :src="post.slika" />
@@ -52,9 +46,6 @@ export default {
       }
     };
 
-    const sortPostsAsc = () => posts.value.sort((a, b) => a.prosjecna_ocjena - b.prosjecna_ocjena);
-    const sortPostsDesc = () => posts.value.sort((a, b) => b.prosjecna_ocjena - a.prosjecna_ocjena);
-
     const deleteById = async (id_atrakcije) => {
       const token = localStorage.getItem("token");
       if (!token) return console.error("Token not found. Please log in.");
@@ -74,15 +65,15 @@ export default {
     };
 
     onMounted(getPosts);
-    return { posts, sortPostsAsc, sortPostsDesc, deleteById };
+    return { posts, deleteById };
   },
 };
 </script>
 
 <style>
-.bg-blue {
-  background-color: #1e90ff; /* Lighter blue background */
-  color: white;
+.bg-yellow {
+  background-color: yellow; /* Yellow background */
+  color: black; /* Adjust text color for readability */
 }
 
 .my-card {

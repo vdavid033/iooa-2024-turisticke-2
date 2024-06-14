@@ -83,8 +83,8 @@ export default {
   max-width: 400px;
   padding: 15px;
   margin-top: 10px;
-  background-color: #007bff;
-  color: white;
+  background-color:yellow;
+  color:black;
   border: none;
   border-radius: 15px; /* Zaobljeni rubovi za gumbove */
   cursor: pointer;
@@ -93,7 +93,7 @@ export default {
 }
 
 .submit-btn:hover, .link-btn:hover {
-  background-color: #0056b3;
+  background-color:yellow;
 }
 
 .links {
