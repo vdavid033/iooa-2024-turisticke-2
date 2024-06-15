@@ -1,45 +1,45 @@
 <template>
   <div style="background-color: yellow; padding: 20px; border-radius: 10px;">
     <!-- Main content section -->
-    <div v-for="post in posts" :key="post.id" class="row q-pa-md">
-      <div q-card>
-        <!-- Image section -->
-        <q-img :src="post.slika" width="800px" height="600px" position="absolute" top="50%" left="50%"
-          transform="translate(-50%, -50%)">
-          <!-- Image overlay for editing options -->
-          <div class="q-pa-md">
-            <q-btn-dropdown color="black" label="Uredi sliku">
-              <q-list>
-                <!-- Form for saving image -->
-                <q-item-section>
-                  <q-form @click="spremiSliku(name, post.id_atrakcije)" class="q-gutter-md">
-                    <q-input class="bg-light-blue-11" filled v-model="name" label="Zalijepi link nove slike" />
-                    <div style="display: flex; justify-content: center; align-items: center;">
-                      <q-btn class="" label="Spremi sliku" type="submit" color="primary" />
-                    </div>
-                  </q-form>
-                </q-item-section>
-                <!-- Button for deleting image -->
-                <q-item clickable v-close-popup @click="obrisi_sliku(post.id_atrakcije)">
+    <div v-for="post in posts" :key="post.id" class="post-container">
+      <div class="post-card">
+        <!-- Image section with canvas border -->
+        <div class="image-canvas">
+          <q-img :src="post.slika" class="post-image">
+            <!-- Image overlay for editing options -->
+            <div class="image-overlay">
+              <q-btn-dropdown color="black" label="Uredi sliku">
+                <q-list>
+                  <!-- Form for saving image -->
                   <q-item-section>
-                    <q-item-label style="display: flex; justify-content: center; align-items: center;">OBRIŠI
-                      SLIKU</q-item-label>
+                    <q-form @submit.prevent="spremiSliku(name, post.id_atrakcije)" class="q-gutter-md">
+                      <q-input class="bg-light-blue-11" filled v-model="name" label="Zalijepi link nove slike" />
+                      <div class="button-center">
+                        <q-btn class="primary-button" label="Spremi sliku" type="submit" color="primary" />
+                      </div>
+                    </q-form>
                   </q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
-          </div>
-          <!-- Image title -->
-          <div class="absolute-bottom text-subtitle1 text-center">
-            <div style="text-transform: uppercase; font-size: 50px">{{ post.naziv }}</div>
-          </div>
-        </q-img>
+                  <!-- Button for deleting image -->
+                  <q-item clickable v-close-popup @click="obrisi_sliku(post.id_atrakcije)">
+                    <q-item-section>
+                      <q-item-label class="center-text">OBRIŠI SLIKU</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </div>
+            <!-- Image title -->
+            <div class="image-title">
+              <div class="uppercase-title">{{ post.naziv }}</div>
+            </div>
+          </q-img>
+        </div>
       </div>
 
       <!-- Details section -->
-      <div class="q-pa-md">
-        <div class="q-pa-md items-start q-gutter-xs" style="background-color: black; color: white;">
-          <p style="font-size: 20px;">Opis:</p>
+      <div class="details-section">
+        <div class="details-card">
+          <p class="details-title">Opis:</p>
           <div class="post-text">{{ post.opis }}</div>
           <!-- Other details like address, rating, etc. -->
           <!-- Add your details here as per your requirement -->
@@ -48,23 +48,23 @@
     </div>
 
     <!-- Navigation buttons -->
-    <q-card-section>
+    <q-card-section class="navigation-buttons">
       <!-- Button to navigate back to the homepage -->
-      <q-btn class="button" @click="$router.push('/')" label="Natrag na početnu" />
+      <q-btn class="button primary-button" @click="$router.push('/')" label="Natrag na početnu" />
       <!-- Button to view comments -->
-      <q-btn class="button" :to="'/komentari/' + trenutniID" label="Pogledaj komentare" />
+      <q-btn class="button primary-button" :to="'/komentari/' + trenutniID" label="Pogledaj komentare" @click="toggleKomentariVisibility" />
     </q-card-section>
 
     <!-- Section for displaying comments -->
     <q-card-section>
-      <div class="q-pa-md row items-start q-gutter-xs">
+      <div v-if="prikazKomentara" class="q-pa-md row items-start q-gutter-xs">
         <!-- Loop through comments and display them -->
         <div v-for="comment in komentari" :key="comment.ID_komentara" class="comment">
-          <p style="font-size: 20px; color: white">{{ comment.Komentar }}</p>
+          <p class="comment-text">{{ comment.Komentar }}</p>
         </div>
+        <!-- Comment section component -->
+        <CommentsSection v-if="prikazKomentara" :attractionId="trenutniID" />
       </div>
-      <!-- Comment section -->
-      <CommentsSection v-if="prikazKomentara" :attractionId="trenutniID" />
     </q-card-section>
   </div>
 </template>
@@ -132,26 +132,121 @@ const obrisi_sliku = async (atrakcijaId) => {
 </script>
 
 <style scoped>
-.row {
+.post-container {
   display: flex;
   flex-wrap: wrap;
-  margin-right: -15px;
-  margin-left: -15px;
+  margin-bottom: 20px;
 }
-.q-pa-md {
-  padding: 16px !important;
-}
-.q-gutter-xs {
-  gap: 4px;
-}
-.q-gutter-md {
-  gap: 16px;
-}
-.my-card {
+
+.post-card {
   width: 100%;
-  margin: 8px 0;
+  max-width: 800px;
+  margin: auto;
+  position: relative;
 }
+
+.image-canvas {
+  border: 10px solid #d3d3d3; /* Canvas-like border */
+  padding: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background-color: white; /* Canvas color */
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  position: relative;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.image-title {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: white;
+  font-size: 50px;
+  text-transform: uppercase;
+}
+
+.details-section {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  padding: 16px;
+}
+
+.details-card {
+  background-color: black;
+  color: white;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.details-title {
+  font-size: 20px;
+}
+
+.navigation-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
 .button {
   margin-right: 8px;
+}
+
+.primary-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.comment {
+  background-color: black;
+  color: white;
+  padding: 16px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+}
+
+.comment-text {
+  font-size: 20px;
+}
+
+.center-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.uppercase-title {
+  text-transform: uppercase;
+  font-size: 50px;
 }
 </style>
