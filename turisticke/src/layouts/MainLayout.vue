@@ -19,7 +19,7 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header> Izbornik </q-item-label>
-        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
+        <EssentialLink v-for="link in filteredLinks" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>
 
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
 
@@ -97,19 +97,43 @@ export default defineComponent({
       }
     }
 
+    // Computed property to filter links based on login status
+  // Computed property to filter links based on login status
+const filteredLinks = computed(() => {
+  return linksList.filter(link => {
+    // Always show "Unos atrakcija" link
+    if (link.title === "Unos atrakcija") {
+      return isUserLoggedIn.value;
+    }
+    // Show "Moje atrakcije" link only if user is logged in
+    else if (link.title === "Moje atrakcije") {
+      return isUserLoggedIn.value;
+    }
+    else if (link.title === "Sve atrakcije") {
+      return isUserLoggedIn.value;
+    }
+    // Always show other links
+    return true;
+  });
+});
+
     // Refresh user role on component initialization
     onMounted(getUserRole);
 
     return {
-      essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
       clearLocalStorage,
       userRole, // Available in the template
-      isUserLoggedIn // Available in the template
+      isUserLoggedIn, // Available in the template
+      filteredLinks, // Computed property to dynamically filter links
     };
   },
 });
 </script>
+
+<style scoped>
+/* Add scoped styles here if needed */
+</style>
