@@ -40,7 +40,8 @@
       <div class="details-section">
         <div class="details-card">
           <p class="details-title">Opis:</p>
-          <div class="post-text">{{ post.opis }}</div>
+          <q-input v-model="post.opis" filled class="opis-input" placeholder="Update opis" />
+          <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Update Opis" />
           <!-- Other details like address, rating, etc. -->
           <!-- Add your details here as per your requirement -->
         </div>
@@ -127,6 +128,15 @@ const obrisi_sliku = async (atrakcijaId) => {
     getPosts(); // Refresh posts to reflect the deletion
   } catch (error) {
     console.error("Error deleting image:", error);
+  }
+};
+
+const updateOpis = async (atrakcijaId, newOpis) => {
+  try {
+    await api.put(`/updateOpis/${atrakcijaId}`, { opis: newOpis });
+    getPosts(); // Refresh posts to show updated opis
+  } catch (error) {
+    console.error("Error updating opis:", error);
   }
 };
 </script>
@@ -248,5 +258,11 @@ const obrisi_sliku = async (atrakcijaId) => {
 .uppercase-title {
   text-transform: uppercase;
   font-size: 50px;
+}
+
+/* Styling for the opis input field */
+.opis-input {
+  color: white;
+  background-color: rgb(255, 255, 255);
 }
 </style>
