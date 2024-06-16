@@ -32,7 +32,7 @@
       <div class="details-section">
         <div class="details-card">
           <p class="details-title">Opis:</p>
-          <q-input v-model="post.opis" filled class="opis-input" placeholder="Update opis" />
+          <q-input v-model="post.opis" filled class="opis-input" type="textarea" autogrow placeholder="Update opis" />
           <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Update Opis" />
         </div>
       </div>
@@ -51,7 +51,6 @@
     </q-card-section>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from "vue";
 import { api } from "boot/axios";
@@ -119,7 +118,6 @@ const updateOpis = async (atrakcijaId, newOpis) => {
   }
 };
 </script>
-
 <style scoped>
 .post-container {
   display: flex;
@@ -139,7 +137,7 @@ const updateOpis = async (atrakcijaId, newOpis) => {
   padding: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  background-color: white; 
+  background-color: white;
 }
 
 .post-image {
@@ -173,7 +171,7 @@ const updateOpis = async (atrakcijaId, newOpis) => {
 }
 
 .details-card {
-  background-color: black;
+  background-color: #007bff;
   color: white;
   padding: 16px;
   border-radius: 10px;
@@ -211,7 +209,7 @@ const updateOpis = async (atrakcijaId, newOpis) => {
 }
 
 .comment {
-  background-color: black;
+  background-color: #007bff;
   color: white;
   padding: 16px;
   margin-bottom: 10px;
@@ -242,5 +240,7 @@ const updateOpis = async (atrakcijaId, newOpis) => {
 .opis-input {
   color: white;
   background-color: white;
+  min-height: 100px;
+  overflow: hidden;
 }
 </style>
