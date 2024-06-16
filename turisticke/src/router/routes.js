@@ -5,9 +5,9 @@ const routes = [
     children: [
       { path: "", component: () => import("pages/PrikazuSve.vue") },
       { path: "index", component: () => import("pages/IndexPage.vue") },
-      { path: "unos", component: () => import("pages/Unos_atrakcija.vue")},
+      { path: "unos", component: () => import("pages/Unos_atrakcija.vue") },
+      { path: "brisanje-korisnika", component: () => import("pages/brisanjePage.vue") }, // Dodana ruta za brisanje korisnika
       { path: "axo", component: () => import("pages/AxiosPageTest.vue") },
-
     ],
   },
 
@@ -19,24 +19,11 @@ const routes = [
     ],
   },
 
-
-
   {
     path: "/registracijaputanja",
     component: () => import("layouts/BlankLayout.vue"),
     children: [
       { path: "", component: () => import("pages/LoginPage.vue") },
-    ],
-  },
-
-  {
-    path: "/",
-    component: () => import("layouts/BlankLayout.vue"),
-    children: [
-      { path: "axo", component: () => import("pages/AxiosPageTest.vue") },
-      { path: "auth", component: () => import("pages/LoginPage.vue") },
-
-
     ],
   },
 
@@ -52,31 +39,19 @@ const routes = [
     path: "/komentari",
     component: () => import("layouts/BlankLayout.vue"),
     children: [
-      {name: "komentari", path: ":id", component: () => import("src/pages/komentariPage.vue") },
+      { name: "komentari", path: ":id", component: () => import("src/pages/komentariPage.vue") },
     ],
   },
-
 
   {
     path: "/slika",
     component: () => import("layouts/BlankLayout.vue"),
     children: [
-      {name: "slika", path: "", component: () => import("src/pages/dodaj_slika.vue") },
+      { name: "slika", path: "", component: () => import("src/pages/dodaj_slika.vue") },
     ],
   },
 
-  /*
-  {
-   path: "/atr",
-    component: () => import("layouts/BlankLayout.vue"),
-    children: [
-      {name: "atr", path: "/atr", component: () => import("pages/AtrakcijePage.vue") },
-    ],
-  },
-*/
-
-  // Always leave this as last one,
-  // but you can also remove it
+  // Route for 404 Page Not Found
   {
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),

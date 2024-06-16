@@ -61,6 +61,15 @@ const linksList = [
     icon: "swap_horizontal_circle",
     link: "unos",
     target: "_self",
+  },
+  {
+    title: "Brisanje korisnika",
+    caption: "brisanje korisnika",
+    icon: "delete",
+    link: "/brisanje-korisnika", // Ažurirano na odgovarajuću rutu
+    target: "_self",
+    // Show only if userRole is 'admin'
+    show: computed(() => userRole.value === 'admin')
   }
 ];
 
@@ -98,24 +107,28 @@ export default defineComponent({
     }
 
     // Computed property to filter links based on login status
-  // Computed property to filter links based on login status
-const filteredLinks = computed(() => {
-  return linksList.filter(link => {
-    // Always show "Unos atrakcija" link
-    if (link.title === "Unos atrakcija") {
-      return isUserLoggedIn.value;
-    }
-    // Show "Moje atrakcije" link only if user is logged in
-    else if (link.title === "Moje atrakcije") {
-      return isUserLoggedIn.value;
-    }
-    else if (link.title === "Sve atrakcije") {
-      return isUserLoggedIn.value;
-    }
-    // Always show other links
-    return true;
-  });
-});
+    const filteredLinks = computed(() => {
+      return linksList.filter(link => {
+        // Always show "Unos atrakcija" link
+        if (link.title === "Unos atrakcija") {
+          return isUserLoggedIn.value;
+        }
+        // Show "Moje atrakcije" link only if user is logged in
+        else if (link.title === "Moje atrakcije") {
+          return isUserLoggedIn.value;
+        }
+        // Show "Sve atrakcije" link only if user is logged in
+        else if (link.title === "Sve atrakcije") {
+          return isUserLoggedIn.value;
+        }
+        // Show "Brisanje korisnika" link only if userRole is 'admin'
+        else if (link.title === "Brisanje korisnika") {
+          return userRole.value === 'admin';
+        }
+        // Always show other links
+        return true;
+      });
+    });
 
     // Refresh user role on component initialization
     onMounted(getUserRole);
