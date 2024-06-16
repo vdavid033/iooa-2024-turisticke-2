@@ -82,16 +82,22 @@ app.post('/unosAtrakcija', authJwt.verifyToken("admin, korisnik"), function (req
 
 
 
-app.post('/dodavanje_slike', function (request, response) {
-  const data = request.body;
-  slika = [[data.id_atrakcije_s, data.slika_s]]
+app.post('/dodajSliku/:id', (req, res) => {
+  const data = [req.body.slika_s, req.params.id];
+  console.log('Received data:', data);
 
-  dbConn.query('INSERT INTO slike (id_atrakcije_s, slika_s ) VALUES ? ',
-    [slika], function (error, results, fields) {
-      if (error) throw error;
-      return response.send({ error: false, data: results, message: 'Slika dodana.' });
-    });
+  dbConn.query("INSERT INTO slike(id_atrakcije_s, slika_s) VALUES (?,?)", data, (err, result) => {
+    if (err) {
+      console.error('Error inserting data:', err);
+      res.status(500).send('Error');
+    } else {
+      console.log('Insert result:', result);
+      res.send(result);
+    }
+  });
 });
+
+
 app.post("/api/unos-slike", function (req, res) {
   const data = req.body;
   const slika = data.slika;
@@ -114,6 +120,14 @@ app.post("/api/unos-slike", function (req, res) {
       });
     }
   );
+});
+app.get('/dohvati_slike/:id_atrakcije', function (request, response) {
+  const id_atrakcije = request.params.id_atrakcije;
+
+  dbConn.query('SELECT * FROM slike WHERE id_atrakcije_s = ?', [id_atrakcije], function (error, results, fields) {
+    if (error) throw error;
+    return response.send({ error: false, data: results, message: 'Slike dohvaćene.' });
+  });
 });
 
 //uzimanje podataka o atrakcijama

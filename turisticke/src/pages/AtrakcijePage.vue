@@ -5,17 +5,17 @@
         <div class="image-canvas">
           <q-img :src="post.slika" class="post-image">
             <div class="image-overlay">
-              <q-btn-dropdown color="black" label="Uredi sliku">
+              <q-btn-dropdown v-if="post.user_id === loggedInUserId" color="black" label="Uredi sliku">
                 <q-list>
                   <q-item-section>
                     <q-form @submit.prevent="spremiSliku(post.id_atrakcije)" class="q-gutter-md">
-                      <q-input class="bg-light-blue-11" filled v-model="post.slika" label="Zalijepi link nove slike" />
+                      <q-input class="bg-light-blue-11" filled v-model="newImageUrl" label="Zalijepi link nove slike" />
                       <div class="button-center">
                         <q-btn class="primary-button" label="Spremi sliku" type="submit" color="primary" />
                       </div>
                     </q-form>
                   </q-item-section>
-                  <q-item clickable v-close-popup @click="obrisi_sliku(post.id_atrakcije)">
+                  <q-item clickable v-close-popup @click="obrisiSliku(post.id_atrakcije)">
                     <q-item-section>
                       <q-item-label class="center-text">OBRIŠI SLIKU</q-item-label>
                     </q-item-section>
@@ -32,14 +32,14 @@
       <div class="details-section">
         <div class="details-card">
           <p class="details-title">Opis:</p>
-          <q-input v-model="post.opis" filled class="opis-input" type="textarea" autogrow placeholder="Update opis" />
-          <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Update Opis" />
+          <q-input v-model="post.opis" filled class="opis-input" type="textarea" autogrow placeholder="Update opis" :readonly="post.user_id !== loggedInUserId" />
+          <q-btn v-if="post.user_id === loggedInUserId" class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Update Opis" />
         </div>
       </div>
     </div>
     <q-card-section class="navigation-buttons">
-      <q-btn class="button primary-button" @click="$router.push('/')" label="Natrag na početnu" />
-      <q-btn class="button primary-button" :to="'/komentari/' + trenutniID" label="Pogledaj komentare" @click="toggleKomentariVisibility" />
+      <q-btn class="button primary-button" @click="$router.push('/')">Natrag na početnu</q-btn>
+      <q-btn class="button primary-button" :to="'/komentari/' + trenutniID">Pogledaj komentare</q-btn>
     </q-card-section>
     <q-card-section>
       <div v-if="prikazKomentara" class="q-pa-md row items-start q-gutter-xs">
@@ -51,10 +51,11 @@
     </q-card-section>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from "vue";
-import { api } from "boot/axios";
 import { useRoute } from "vue-router";
+import { api } from "boot/axios";
 import CommentsSection from '../components/CommentsSection.vue';
 
 const posts = ref([]);
@@ -62,6 +63,8 @@ const route = useRoute();
 const trenutniID = route.params.id;
 const prikazKomentara = ref(false);
 const komentari = ref([]);
+const loggedInUserId = ref(null); // Assume you have a way to get the logged-in user's ID
+const newImageUrl = ref("");
 
 const getPosts = async () => {
   try {
@@ -91,16 +94,16 @@ const toggleKomentariVisibility = () => {
 };
 
 const spremiSliku = async (atrakcijaId) => {
-  const post = posts.value.find(p => p.id_atrakcije === atrakcijaId);
   try {
-    await api.put(`/update-slika/${atrakcijaId}`, { newImageUrl: post.slika });
+    await api.put(`/update-slika/${atrakcijaId}`, { newImageUrl: newImageUrl.value });
     getPosts();
+    newImageUrl.value = ""; // Clear input after saving
   } catch (error) {
     console.error("Error updating image:", error);
   }
 };
 
-const obrisi_sliku = async (atrakcijaId) => {
+const obrisiSliku = async (atrakcijaId) => {
   try {
     await api.delete(`/delete-slika/${atrakcijaId}`);
     getPosts();
@@ -118,129 +121,7 @@ const updateOpis = async (atrakcijaId, newOpis) => {
   }
 };
 </script>
+
 <style scoped>
-.post-container {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.post-card {
-  width: 100%;
-  max-width: 800px;
-  margin: auto;
-  position: relative;
-}
-
-.image-canvas {
-  border: 10px solid #d3d3d3;
-  padding: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  background-color: white;
-}
-
-.post-image {
-  width: 100%;
-  height: auto;
-  position: relative;
-}
-
-.image-overlay {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-.image-title {
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  color: white;
-  font-size: 50px;
-  text-transform: uppercase;
-}
-
-.details-section {
-  width: 100%;
-  max-width: 800px;
-  margin: auto;
-  padding: 16px;
-}
-
-.details-card {
-  background-color: #007bff;
-  color: white;
-  padding: 16px;
-  border-radius: 10px;
-}
-
-.details-title {
-  font-size: 20px;
-}
-
-.navigation-buttons {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.button {
-  margin-right: 8px;
-}
-
-.primary-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.primary-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-.comment {
-  background-color: #007bff;
-  color: white;
-  padding: 16px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-}
-
-.comment-text {
-  font-size: 20px;
-}
-
-.center-text {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.button-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.uppercase-title {
-  text-transform: uppercase;
-  font-size: 50px;
-}
-
-.opis-input {
-  color: white;
-  background-color: white;
-  min-height: 100px;
-  overflow: hidden;
-}
+/* Your scoped styles here */
 </style>
