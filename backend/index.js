@@ -596,3 +596,30 @@ app.post("/prijavi", function (req, res) {
   );
 });
 
+app.put('/updateOpis/:id', (req, res) => {
+  const id = req.params.id;
+  const { opis } = req.body;
+  dbConn.query("UPDATE atrakcije SET opis = ? WHERE id_atrakcije = ?", [opis, id], (err, result) => {
+    if (err) {
+      console.error('Error updating opis:', err);
+      res.status(500).send({ error: true, message: 'Error updating opis.' });
+    } else {
+      res.send({ error: false, message: 'Opis successfully updated.' });
+    }
+  });
+});
+
+//edit slika
+app.put('/update-slika/:id', (req, res) => {
+  const id = req.params.id;
+  const { newImageUrl } = req.body;
+
+  dbConn.query("UPDATE atrakcije SET slika = ? WHERE id_atrakcije = ?", [newImageUrl, id], (err, result) => {
+    if (err) {
+      console.error('Error updating image:', err);
+      res.status(500).send({ error: true, message: 'Error updating image.' });
+    } else {
+      res.send({ error: false, message: 'Image successfully updated.' });
+    }
+  });
+});
