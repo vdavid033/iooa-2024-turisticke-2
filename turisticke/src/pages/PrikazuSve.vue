@@ -12,7 +12,7 @@
       <!-- Kartice atrakcija -->
       <q-card
         v-for="post in filteredPosts"
-        :key="post.id"
+        :key="post.id_atrakcije"
         class="my-card"
       >
         <q-img :src="post.slika" class="my-card-img"/>
@@ -27,27 +27,19 @@
             :to="'/one_atraction/' + post.id_atrakcije"
           />
 
-          <q-btn
-            fab
-            color="red"
-            icon="delete"
-            class="absolute"
-            style="top: 0px; left: 12px; transform: translateY(-50%)"
-            @click="deleteById(post.id_atrakcije)"
-          />
-
-          <div class="myDiv" style="padding: 10px"></div>
+          <div class="myDiv" style="padding: 10px">
+            <q-rating
+              v-model="post.prosjecna_ocjena"
+              :max="5"
+              :readonly="true"
+              size="32px"
+            />
+          </div>
 
           <div class="row no-wrap items-center">
             <div class="col text-h6 ellipsis">{{ post.naziv }}</div>
           </div>
 
-          <q-rating
-            v-model="post.prosjecna_ocjena"
-            :max="5"
-            :readonly="true"
-            size="32px"
-          />
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -67,8 +59,7 @@
 
 <script>
 import { ref, computed, onMounted } from "vue";
-import { api } from "boot/axios";
-import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
+import { api } from "boot/axios"; // Pretpostavka da je Axios konfiguriran
 
 export default {
   setup() {
@@ -79,38 +70,23 @@ export default {
       try {
         const response = await api.get("sveatrakcije");
         posts.value = response.data;
+
+        // Fetch and update average ratings for each post
+        for (let post of posts.value) {
+          post.prosjecna_ocjena = await getAverageRating(post.id_atrakcije);
+        }
       } catch (error) {
         console.error(error);
       }
     };
 
-    const deleteById = async (id_atrakcije) => {
+    const getAverageRating = async (id_atrakcije) => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("Token not found. Please log in.");
-          return;
-        }
-
-        // Decode the JWT token to get user details
-        const decodedToken = jwtDecode(token);
-        const id_korisnika = decodedToken.id;
-        const uloga = decodedToken.uloga;
-
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            id_korisnika, // Pass the user ID to the backend
-            uloga,
-          },
-        };
-
-        const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id_atrakcije}`, config);
-        getPosts(); // Refresh the attraction list after deletion
+        const response = await api.get(`/atrakcijeProsjecneOcjene/${id_atrakcije}`);
+        return response.data.prosjecna_ocjena; // Ovdje pretpostavljamo da ćeš dobiti samo jedan rezultat za svaki id_atrakcije
       } catch (error) {
-        console.error("Failed to delete post:", error);
+        console.error('Greška pri dohvaćanju prosječne ocjene:', error);
+        return null;
       }
     };
 
@@ -130,7 +106,7 @@ export default {
       );
     });
 
-    return { posts, searchTerm, search, filteredPosts, deleteById };
+    return { posts, searchTerm, search, filteredPosts };
   },
 };
 </script>
@@ -148,7 +124,7 @@ export default {
 }
 
 .my-card {
-  flex: 1 1 calc(33.3333% - 16px); /* Three cards per row, with some margin */
+  flex: 1 1 calc(33.3333% - 16px); /* Tri kartice po redu, s malim razmakom */
   max-width: calc(33.3333% - 16px);
   margin-bottom: 16px;
   box-sizing: border-box;
@@ -158,28 +134,28 @@ export default {
 }
 
 .my-card-img {
-  height: 200px; /* Set a fixed height for images */
-  object-fit: cover; /* Ensure the image covers the area without distorting */
+  height: 200px; /* Fiksna visina slike */
+  object-fit: cover; /* Osigurava da slika pokriva područje bez iskrivljivanja */
 }
 
 .my-search-bar {
   margin-bottom: 10px;
   margin-left: 20px;
   background-color: #ffffff9d;
-  width: 50%; /* Increased width */
+  width: 50%; /* Povećana širina */
   border-radius: 10px;
 }
 
 @media (max-width: 1200px) {
   .my-card {
-    flex: 1 1 calc(50% - 16px); /* Two cards per row */
+    flex: 1 1 calc(50% - 16px); /* Dvije kartice po redu */
     max-width: calc(50% - 16px);
   }
 }
 
 @media (max-width: 768px) {
   .my-card {
-    flex: 1 1 100%; /* One card per row */
+    flex: 1 1 100%; /* Jedna kartica po redu */
     max-width: 100%;
   }
 }

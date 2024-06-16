@@ -322,18 +322,24 @@ app.put('/dodajOcjenu/:id', (req, res) => {
 });
  
 //DOHVAT PROSJEČNE OCJENE ZA ATRAKCIJU
-app.get('/atrakcijeProsjecneOcjene/:id', (req, res) => {
-  const data = [req.params.id]
-  //SELECT AVG(ocjena) FROM `Ocjena` WHERE VK_ID_Atrakcije = 141
-  dbConn.query("SELECT AVG(ocjena) as prosjek FROM Ocjena WHERE VK_ID_Atrakcije = ?", data, (err, result) => {
+
+app.get('/atrakcijeProsjecneOcjene/:id_atrakcije', (req, res) => {
+  const id_atrakcije = req.params.id_atrakcije;
+  const sql = "SELECT AVG(ocjena) AS prosjecna_ocjena FROM Komentari WHERE VK_ID_atrakcije = ?";
+  dbConn.query(sql, [id_atrakcije], (err, result) => {
     if (err) {
-      res.send('Error')
-    } else {
-      res.send(result)
+      console.error('Error fetching average rating:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
     }
-  })
+
+    if (result.length === 0 || result[0].prosjecna_ocjena === null) {
+      res.json({ prosjecna_ocjena: 0 }); // Ako nema ocjena, vraćamo prosjek 0
+    } else {
+      res.json({ prosjecna_ocjena: parseFloat(result[0].prosjecna_ocjena.toFixed(2)) });
+    }
+  });
 });
- 
 // Dodavanje ocjene za atrakciju u tablicu OCJENE
  
 app.post('/dodajOcjenuOcjene/:id', (req, res) => {

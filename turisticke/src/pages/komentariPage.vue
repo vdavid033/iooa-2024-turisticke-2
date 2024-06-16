@@ -7,7 +7,7 @@
         <span>{{ prosjekOcjena.toFixed(1) }}</span>
       </div>
     </div>
- 
+
     <div v-if="komentari.length > 0" class="comment-list">
       <h3>Komentari:</h3>
       <div v-for="(komentarObj, index) in komentari" :key="index" class="komentar-card">
@@ -17,7 +17,7 @@
         </div>
       </div>
     </div>
- 
+
     <div class="comment-form">
       <h3>Unos komentara</h3>
       <h6>Upišite svoj komentar o atrakciji</h6>
@@ -33,20 +33,20 @@
         <q-btn label="Dodaj komentar i ocjenu" @click="dodajKomentarIOcjenu" class="add-comment-btn" />
       </q-card-section>
     </div>
- 
+
     <q-card-section>
       <q-btn color="#4CAF50" @click="$router.push('/')">Natrag na početnu</q-btn>
     </q-card-section>
- 
+
     <q-snackbar v-model="showSnackbar" :timeout="3000" message="Uspješno ste dodali komentar i ocjenu!" />
   </div>
 </template>
- 
+
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
- 
+
 const route = useRoute();
 const router = useRouter();
 const trenutniID = route.params.id;
@@ -56,7 +56,7 @@ const ocjena = ref(0);
 const komentari = ref([]);
 const prosjekOcjena = ref(null);
 const dense = ref(true);
- 
+
 const dohvatiKomentare = async () => {
   try {
     const response = await axios.get(`http://localhost:4200/prikazikomentari/${trenutniID}`);
@@ -71,7 +71,7 @@ const dohvatiKomentare = async () => {
     console.log(error);
   }
 };
- 
+
 const dohvatiProsjekOcjena = async () => {
   try {
     const response = await axios.get(`http://localhost:4200/atrakcijeProsjecneOcjene/${trenutniID}`);
@@ -88,11 +88,11 @@ const izracunajProsjekOcjena = () => {
     prosjekOcjena.value = null;
     return;
   }
- 
+
   const sum = komentari.value.reduce((acc, curr) => acc + curr.Ocjena, 0);
   prosjekOcjena.value = sum / komentari.value.length;
 };
- 
+
 const dodajKomentarIOcjenu = async () => {
   try {
     const responseKomentar = await axios.post(`http://localhost:4200/dodajKomentar/${trenutniID}`, {
@@ -100,61 +100,61 @@ const dodajKomentarIOcjenu = async () => {
       Korisnik: "Trenutni korisnik", // Zamijenite s stvarnim korisničkim imenom
       Ocjena: ocjena.value
     });
- 
+
     showSnackbar.value = true; // Prikazivanje snackbar poruke
- 
+
     await dohvatiKomentare();
     // Prosječna ocjena će se automatski izračunati nakon dohvaćanja komentara
- 
+
   } catch (error) {
     console.log(error);
   }
 };
- 
+
 onMounted(() => {
   dohvatiKomentare();
   dohvatiProsjekOcjena();
 });
- 
+
 watch(komentari, (newValue) => {
   console.log("Novi komentari:", newValue);
 });
 </script>
- 
+
 <style scoped>
 .star-rating {
   font-size: 24px;
 }
- 
+
 .star-rating span {
   cursor: pointer;
 }
- 
+
 .star-rating .filled {
   color: #fdd835;
 }
- 
+
 .star-rating .yellow-star {
   color: yellow;
 }
- 
+
 .comment-container {
   background-color: #f4f4f4;
   padding: 20px;
   border-radius: 10px;
 }
- 
+
 .comment-form {
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
 }
- 
+
 .form-input {
   margin-bottom: 15px;
 }
- 
+
 .komentar-card {
   background-color: #ffffff;
   border-radius: 10px;
@@ -162,21 +162,21 @@ watch(komentari, (newValue) => {
   margin-bottom: 15px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
- 
+
 .average-rating {
   margin-top: 20px;
 }
- 
+
 .add-comment-btn {
   background-color: #229df9;
   color: white;
   border-radius: 5px;
 }
- 
+
 .add-comment-btn:hover {
   background-color: #1c7bd4;
 }
- 
+
 button {
   background-color: #4CAF50;
   color: white;
@@ -185,27 +185,27 @@ button {
   padding: 10px 20px;
   cursor: pointer;
 }
- 
+
 button:hover {
   background-color: #ff9900;
 }
- 
+
 .rating {
   font-weight: bold;
   color: #4CAF50;
 }
- 
+
 /* Snackbar */
 .q-snackbar {
   background-color: #4CAF50;
   color: white;
   border-radius: 5px;
 }
- 
+
 .q-snackbar__message {
   font-weight: bold;
 }
- 
+
 .q-snackbar__actions {
   justify-content: flex-end;
 }
