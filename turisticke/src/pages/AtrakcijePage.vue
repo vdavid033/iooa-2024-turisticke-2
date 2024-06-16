@@ -1,16 +1,12 @@
 <template>
   <div style="background-color: yellow; padding: 20px; border-radius: 10px;">
-    <!-- Main content section -->
     <div v-for="post in posts" :key="post.id" class="post-container">
       <div class="post-card">
-        <!-- Image section with canvas border -->
         <div class="image-canvas">
           <q-img :src="post.slika" class="post-image">
-            <!-- Image overlay for editing options -->
             <div class="image-overlay">
               <q-btn-dropdown color="black" label="Uredi sliku">
                 <q-list>
-                  <!-- Form for saving image -->
                   <q-item-section>
                     <q-form @submit.prevent="spremiSliku(name, post.id_atrakcije)" class="q-gutter-md">
                       <q-input class="bg-light-blue-11" filled v-model="name" label="Zalijepi link nove slike" />
@@ -19,8 +15,7 @@
                       </div>
                     </q-form>
                   </q-item-section>
-                  <!-- Button for deleting image -->
-                  <q-item clickable v-close-popup @click="obrisi_sliku(post.id_atrakcije)">
+                    <q-item clickable v-close-popup @click="obrisi_sliku(post.id_atrakcije)">
                     <q-item-section>
                       <q-item-label class="center-text">OBRIŠI SLIKU</q-item-label>
                     </q-item-section>
@@ -36,34 +31,25 @@
         </div>
       </div>
 
-      <!-- Details section -->
       <div class="details-section">
         <div class="details-card">
           <p class="details-title">Opis:</p>
           <q-input v-model="post.opis" filled class="opis-input" placeholder="Update opis" />
           <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Update Opis" />
-          <!-- Other details like address, rating, etc. -->
-          <!-- Add your details here as per your requirement -->
         </div>
       </div>
     </div>
 
-    <!-- Navigation buttons -->
     <q-card-section class="navigation-buttons">
-      <!-- Button to navigate back to the homepage -->
       <q-btn class="button primary-button" @click="$router.push('/')" label="Natrag na početnu" />
-      <!-- Button to view comments -->
       <q-btn class="button primary-button" :to="'/komentari/' + trenutniID" label="Pogledaj komentare" @click="toggleKomentariVisibility" />
     </q-card-section>
 
-    <!-- Section for displaying comments -->
     <q-card-section>
       <div v-if="prikazKomentara" class="q-pa-md row items-start q-gutter-xs">
-        <!-- Loop through comments and display them -->
         <div v-for="comment in komentari" :key="comment.ID_komentara" class="comment">
           <p class="comment-text">{{ comment.Komentar }}</p>
         </div>
-        <!-- Comment section component -->
         <CommentsSection v-if="prikazKomentara" :attractionId="trenutniID" />
       </div>
     </q-card-section>
@@ -156,11 +142,11 @@ const updateOpis = async (atrakcijaId, newOpis) => {
 }
 
 .image-canvas {
-  border: 10px solid #d3d3d3; /* Canvas-like border */
+  border: 10px solid #d3d3d3;
   padding: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  background-color: white; /* Canvas color */
+  background-color: white; 
 }
 
 .post-image {
@@ -260,7 +246,6 @@ const updateOpis = async (atrakcijaId, newOpis) => {
   font-size: 50px;
 }
 
-/* Styling for the opis input field */
 .opis-input {
   color: white;
   background-color: rgb(255, 255, 255);
