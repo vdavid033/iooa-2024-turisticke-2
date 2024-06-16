@@ -1,5 +1,5 @@
 <template>
-  <div class="comment-container">
+  <div class="comment-container" style="background-color: #f4f4f4; padding: 20px; border-radius: 10px;">
     <div v-if="prosjekOcjena !== null" class="average-rating">
       <h3>Prosječna ocjena:</h3>
       <div class="star-rating">
@@ -11,14 +11,14 @@
     <div v-if="komentari.length > 0" class="comment-list">
       <h3>Komentari:</h3>
       <div v-for="(komentarObj, index) in komentari" :key="index" class="komentar-card">
-        <p><strong>{{ komentarObj.Korisnik }}:</strong> {{ komentarObj.Komentar }}</p>
+        <p><span>&#128100;</span> <strong>{{ komentarObj.Korisnik }}:</strong> {{ komentarObj.Komentar }}</p>
         <div class="star-rating">
           <span v-for="star in 5" :key="star" :class="{ 'filled': star <= komentarObj.Ocjena }">&#9733;</span>
         </div>
       </div>
     </div>
 
-    <div class="comment-form">
+    <div class="comment-form" style="background-color: whitesmoke; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
       <h3>Unos komentara</h3>
       <h6>Upišite svoj komentar o atrakciji</h6>
       <div class="form-input">
@@ -82,7 +82,7 @@ const dohvatiProsjekOcjena = async () => {
     console.log(error);
   }
 };
- 
+
 const izracunajProsjekOcjena = () => {
   if (komentari.value.length === 0) {
     prosjekOcjena.value = null;
@@ -123,7 +123,7 @@ watch(komentari, (newValue) => {
 
 <style scoped>
 .star-rating {
-  font-size: 24px;
+  font-size: 30px;
 }
 
 .star-rating span {
@@ -139,32 +139,21 @@ watch(komentari, (newValue) => {
 }
 
 .comment-container {
-  background-color: #f4f4f4;
+  background-color:whitesmoke;
   padding: 20px;
   border-radius: 10px;
 }
 
-.comment-form {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-.form-input {
-  margin-bottom: 15px;
+.comment-list {
+  margin-top: 20px;
 }
 
 .komentar-card {
-  background-color: #ffffff;
+  background-color: yellow;
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.average-rating {
-  margin-top: 20px;
 }
 
 .add-comment-btn {
