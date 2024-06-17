@@ -162,15 +162,7 @@ app.get('/natrakcije/:id', (req, res) => {
   });
 });
 
-app.get('/slike', (req, res) => {
-  dbConn.query("select * from slike", (err, result) => {
-    if (err) {
-      res.send('error');
-    } else {
-      res.send(result);
-    }
-  });
-});
+
 
 //uzimanje podataka o atrakcijama
 app.get('/sveatrakcije', (req, res) => {
@@ -182,18 +174,47 @@ app.get('/sveatrakcije', (req, res) => {
     }
   });
 });
-app.get('/slike', (req, res) => {
-  dbConn.query("select * from slike", (err, result) => {
+
+app.get('/slike/:VK_ID_atrakcije', (req, res) => {
+  const { VK_ID_atrakcije } = req.params;
+  const sql = 'SELECT ID_Slike, VK_ID_atrakcije, slike FROM Slike WHERE VK_ID_atrakcije = ?';
+
+  dbConn.query(sql, [VK_ID_atrakcije], (err, results) => {
     if (err) {
-      res.send('error');
+      console.error('Greška prilikom izvršavanja upita: ' + err.message);
+      res.status(500).json({ error: 'Greška prilikom dohvata podataka' });
+      return;
+    }
+
+    if (results.length === 0) {
+      res.status(404).json({ error: 'Nema slika za dani VK_ID_atrakcije' });
     } else {
-      res.send(result);
+      res.json(results);
     }
   });
 });
 
 
+app.post('/slikee', (req, res) => {
+  const { VK_ID_atrakcije, slike } = req.body;
 
+  if (!VK_ID_atrakcije || !slike) {
+    res.status(400).json({ error: 'Nedostaju potrebni podaci' });
+    return;
+  }
+
+  const sql = 'INSERT INTO Slike (VK_ID_atrakcije, slike) VALUES (?, ?)';
+
+  dbConn.query(sql, [VK_ID_atrakcije, slike], (err, results) => {
+    if (err) {
+      console.error('Greška prilikom izvršavanja upita: ' + err.message);
+      res.status(500).json({ error: 'Greška prilikom unosa podataka' });
+      return;
+    }
+
+    res.status(201).json({ message: 'Slika uspješno dodana', insertId: results.insertId });
+  });
+});
 app.get('/prikazikomentari/:id', (req, res) => {
   let id_atrakcije = req.params.id;
   dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije = ?", [id_atrakcije], (error, results) => {

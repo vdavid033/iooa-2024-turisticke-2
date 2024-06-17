@@ -18,8 +18,13 @@
         </q-card-section>
 
         <q-card-section>
-          <q-input v-model="newImageUrl" filled class="opis-input" type="text" placeholder="Nova URL slike" />
-          <q-btn class="primary-button" @click="spremiSliku(post.id_atrakcije)" label="Spremi sliku" />
+          <q-input v-model="newMainImageUrl" filled class="opis-input" type="text" placeholder="Nova glavna URL slike" />
+          <q-btn class="primary-button" @click="spremiGlavnuSliku(post.id_atrakcije)" label="Spremi glavnu sliku" />
+        </q-card-section>
+
+        <q-card-section>
+          <q-input v-model="newGalleryImageUrl" filled class="opis-input" type="text" placeholder="Nova URL slike za galeriju" />
+          <q-btn class="primary-button" @click="spremiSlikuUGaleriju(post.id_atrakcije)" label="Spremi sliku u galeriju" />
           <q-btn class="negative-button" @click="deleteById(post.id_atrakcije)" label="Obriši atrakciju" />
         </q-card-section>
       </q-card>
@@ -40,8 +45,9 @@ export default {
   setup() {
     const posts = ref([]);
     const searchTerm = ref("");
-    const newImageUrl = ref("");
-    const showDescription = ref({}); // State to track visibility of descriptions
+    const newMainImageUrl = ref("");
+    const newGalleryImageUrl = ref("");
+    const showDescription = ref({});
 
     const getPosts = async () => {
       const token = localStorage.getItem("token");
@@ -57,12 +63,10 @@ export default {
         });
         posts.value = response.data;
 
-        // Initialize showDescription for each post
         posts.value.forEach(post => {
           showDescription.value[post.id_atrakcije] = false;
         });
 
-        // Fetch and update average ratings for each post
         for (let post of posts.value) {
           post.prosjecna_ocjena = await getAverageRating(post.id_atrakcije);
         }
@@ -117,13 +121,23 @@ export default {
       }
     };
 
-    const spremiSliku = async (atrakcijaId) => {
+    const spremiGlavnuSliku = async (atrakcijaId) => {
       try {
-        await api.put(`/update-slika/${atrakcijaId}`, { newImageUrl: newImageUrl.value });
+        await api.put(`/update-slika/${atrakcijaId}`, { newImageUrl: newMainImageUrl.value });
         getPosts();
-        newImageUrl.value = ""; // Clear input after saving
+        newMainImageUrl.value = "";
       } catch (error) {
-        console.error("Error updating image:", error);
+        console.error("Error updating main image:", error);
+      }
+    };
+
+    const spremiSlikuUGaleriju = async (atrakcijaId) => {
+      try {
+        await api.post(`/slikee`, { VK_ID_atrakcije: atrakcijaId, slike: newGalleryImageUrl.value });
+        getPosts();
+        newGalleryImageUrl.value = "";
+      } catch (error) {
+        console.error("Error adding gallery image:", error);
       }
     };
 
@@ -137,7 +151,7 @@ export default {
       );
     });
 
-    return { posts, searchTerm, newImageUrl, showDescription, search, filteredPosts, deleteById, updateOpis, spremiSliku };
+    return { posts, searchTerm, newMainImageUrl, newGalleryImageUrl, showDescription, search, filteredPosts, deleteById, updateOpis, spremiGlavnuSliku, spremiSlikuUGaleriju };
   },
 };
 </script>
@@ -155,7 +169,7 @@ export default {
 }
 
 .my-card {
-  flex: 1 1 calc(33.3333% - 16px); /* Tri kartice po redu, s malim razmakom */
+  flex: 1 1 calc(33.3333% - 16px);
   max-width: calc(33.3333% - 16px);
   margin-bottom: 16px;
   box-sizing: border-box;
@@ -165,48 +179,36 @@ export default {
 }
 
 .my-card-img {
-  height: 200px; /* Fiksna visina slike */
-  object-fit: cover; /* Osigurava da slika pokriva područje bez iskrivljivanja */
+  height: 200px;
+  object-fit: cover;
 }
 
 .my-search-bar {
   margin-bottom: 10px;
   margin-left: 20px;
   background-color: #ffffff9d;
-  width: 50%; /* Povećana širina */
+  width: 50%;
   border-radius: 10px;
-}
-
-.toggle-button {
-  background-color: #4caf50;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.toggle-button:hover {
-  background-color: #45a049;
 }
 
 @media (max-width: 1200px) {
   .my-card {
-    flex: 1 1 calc(50% - 16px); /* Dvije kartice po redu */
+    flex: 1 1 calc(50% - 16px);
     max-width: calc(50% - 16px );
   }
 }
 
 @media (max-width: 768px) {
   .my-card {
-    flex: 1 1 100%; /* Jedna kartica po redu */
+    flex: 1 1 100%;
     max-width: 100%;
   }
 }
 
 @media (max-width: 600px) {
   .my-search-bar {
-    width: 100%; /* Full width on smaller screens */
-    margin-left: 0; /* Remove left margin on smaller screens */
+    width: 100%;
+    margin-left: 0;
   }
 }
 
@@ -224,12 +226,11 @@ export default {
 }
 
 .text-caption {
-  max-height: 100px; /* Limit maximum height of opis text */
-  overflow-y: auto; /* Add scrollbar when opis text overflows */
+  max-height: 100px;
+  overflow-y: auto;
 }
 
 .q-card-section:not(:last-child) {
-  margin-bottom: 10px; /* Add margin bottom to all card sections except the last one */
+  margin-bottom: 10px;
 }
 </style>
-

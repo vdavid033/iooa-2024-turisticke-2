@@ -49,11 +49,33 @@
         <CommentsSection v-if="prikazKomentara" :attractionId="trenutniID" />
       </div>
     </q-card-section>
+
+    <!-- Gallery Section -->
+    <q-card-section>
+      <div class="gallery-container">
+        <div v-if="slike.length === 0" class="empty-gallery">Nema dostupnih slika.</div>
+        <div v-else class="gallery">
+          <q-img
+            v-for="slika in slike"
+            :key="slika.ID_Slike"
+            :src="slika.slike"
+            class="gallery-image"
+            style="border-radius: 10px; cursor: pointer;"
+            @click="openImageModal(slika)"
+          />
+        </div>
+      </div>
+    </q-card-section>
+
+    <!-- Image Dialog -->
+    <q-dialog v-model="showImageDialog">
+      <q-img :src="selectedImage" class="enlarged-image" style="border-radius: 10px;" />
+    </q-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "boot/axios";
 import CommentsSection from '../components/CommentsSection.vue';
@@ -65,12 +87,14 @@ const prikazKomentara = ref(false);
 const komentari = ref([]);
 const loggedInUserId = ref(null); // Assume you have a way to get the logged-in user's ID
 const newImageUrl = ref("");
+const slike = ref([]);
 
 const getPosts = async () => {
   try {
     const response = await api.get(`/natrakcije/${trenutniID}`);
     posts.value = response.data ? [response.data] : [];
     await getComments(trenutniID);
+    await getSlike();
   } catch (error) {
     console.error("Error fetching attraction details:", error);
   }
@@ -85,6 +109,15 @@ const getComments = async (attractionId) => {
   }
 };
 
+const getSlike = async () => {
+  try {
+    const response = await api.get(`/slike/${trenutniID}`);
+    slike.value = response.data;
+  } catch (error) {
+    console.error("Error fetching images:", error);
+  }
+};
+
 onMounted(() => {
   getPosts();
 });
@@ -93,35 +126,57 @@ const toggleKomentariVisibility = () => {
   prikazKomentara.value = !prikazKomentara.value;
 };
 
-const spremiSliku = async (atrakcijaId) => {
-  try {
-    await api.put(`/update-slika/${atrakcijaId}`, { newImageUrl: newImageUrl.value });
-    getPosts();
-    newImageUrl.value = ""; // Clear input after saving
-  } catch (error) {
-    console.error("Error updating image:", error);
-  }
+
+
+
+
+
+const showImageDialog = ref(false); // State to control visibility of the image dialog
+const selectedImage = ref(""); // URL of the selected image to display in the dialog
+
+const openImageModal = (slika) => {
+  selectedImage.value = slika.slike; // Set the selected image URL
+  showImageDialog.value = true; // Show the dialog
 };
 
-const obrisiSliku = async (atrakcijaId) => {
-  try {
-    await api.delete(`/delete-slika/${atrakcijaId}`);
-    getPosts();
-  } catch (error) {
-    console.error("Error deleting image:", error);
+// Watch for dialog visibility change to handle body overflow
+watch(showImageDialog, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden'; // Disable body scroll
+  } else {
+    document.body.style.overflow = ''; // Enable body scroll
   }
-};
-
-const updateOpis = async (atrakcijaId, newOpis) => {
-  try {
-    await api.put(`/updateOpis/${atrakcijaId}`, { opis: newOpis });
-    getPosts();
-  } catch (error) {
-    console.error("Error updating opis:", error);
-  }
-};
+});
 </script>
 
 <style scoped>
 /* Your scoped styles here */
+.gallery-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.gallery-image {
+  width: 150px;
+  height: 150px;
+  margin: 10px;
+  cursor: pointer;
+  object-fit: cover;
+  border-radius: 10px; /* Rounded corners */
+}
+
+.empty-gallery {
+  text-align: center;
+  margin-top: 20px;
+  color: gray;
+}
+
+.enlarged-image {
+  max-width: 80vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 10px; /* Rounded corners */
+}
 </style>

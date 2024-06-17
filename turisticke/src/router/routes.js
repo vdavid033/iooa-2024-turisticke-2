@@ -8,6 +8,7 @@ const routes = [
       { path: "unos", component: () => import("pages/Unos_atrakcija.vue") },
       { path: "brisanje-korisnika", component: () => import("pages/brisanjePage.vue") }, // Dodana ruta za brisanje korisnika
       { path: "axo", component: () => import("pages/AxiosPageTest.vue") },
+      { path: "gallery/:id", component: () => import("pages/GalleryPage.vue"), name: "gallery" }, // Ruta za galeriju slika
     ],
   },
 

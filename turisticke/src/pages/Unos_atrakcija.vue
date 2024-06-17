@@ -32,26 +32,8 @@
                 <q-input
                   ref="adresaRef"
                   v-model="inputAdresa"
-                  label="Adresa"
+                  label="Drzava"
                   placeholder="Adresa atrakcije"
-                ></q-input>
-
-                <!-- Širina -->
-                <q-input
-                  ref="sirinaRef"
-                  v-model="inputSirina"
-                  label="Širina"
-                  placeholder="Geografska Širina atr"
-                  type="number"
-                ></q-input>
-
-                <!-- Dužina -->
-                <q-input
-                  ref="duzinaRef"
-                  v-model="inputDuzina"
-                  label="Dužina"
-                  placeholder="Geografska dužina atr"
-                  type="number"
                 ></q-input>
 
                 <!-- Upload slike -->
@@ -100,12 +82,10 @@ export default {
     return {
       inputNaziv: "",
       inputOpis: "",
-      inputDuzina: "",
-      inputSirina: "",
       inputAdresa: "",
       file: null,
       base64Image: "",
-      previewImage: "", // new property for preview image URL
+      previewImage: "",
       showDialog: false
     };
   },
@@ -130,8 +110,8 @@ export default {
         const reader = new FileReader();
         reader.readAsDataURL(compressedFile);
         reader.onload = () => {
-          this.base64Image = reader.result; // store compressed image
-          this.previewImage = reader.result; // initially set preview image as compressed image
+          this.base64Image = reader.result;
+          this.previewImage = reader.result;
 
           // Optionally, create a smaller preview image (e.g., 200px width)
           const img = new Image();
@@ -142,7 +122,7 @@ export default {
             canvas.width = 200;
             canvas.height = (200 / img.width) * img.height;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            this.previewImage = canvas.toDataURL('image/jpeg'); // set scaled preview image
+            this.previewImage = canvas.toDataURL('image/jpeg');
           };
         };
         reader.onerror = (error) => {
@@ -172,8 +152,6 @@ export default {
         naziv: this.inputNaziv,
         opis: this.inputOpis,
         slika: this.base64Image,
-        geografska_duzina: this.inputDuzina,
-        geografska_sirina: this.inputSirina,
         adresa: this.inputAdresa,
         id_korisnika: userId
       };
@@ -200,12 +178,10 @@ export default {
     resetForm() {
       this.inputNaziv = "";
       this.inputOpis = "";
-      this.inputDuzina = "";
-      this.inputSirina = "";
       this.inputAdresa = "";
       this.file = null;
       this.base64Image = "";
-      this.previewImage = ""; // reset preview image on form reset
+      this.previewImage = "";
     },
     closeAndReload() {
       this.showDialog = false;
