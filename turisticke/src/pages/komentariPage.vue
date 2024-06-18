@@ -149,7 +149,7 @@ watch(komentari, (newValue) => {
 }
 
 .komentar-card {
-  background-color: yellow;
+  background-color: #fcfda0;
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
