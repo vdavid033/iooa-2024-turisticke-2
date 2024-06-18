@@ -1,7 +1,8 @@
 <template>
-  <div class="comment-container" style="background-color: #f4f4f4; padding: 20px; border-radius: 10px;">
+  <div class="page-container">
+  <div class="comment-container">
     <div v-if="prosjekOcjena !== null" class="average-rating">
-      <h3>Prosječna ocjena:</h3>
+      <h3>PROSJEČNA OCJENA OVE ATRAKCIJE</h3>
       <div class="star-rating">
         <span v-for="star in 5" :key="star" :class="{ 'filled': star <= prosjekOcjena }">&#9733;</span>
         <span>{{ prosjekOcjena.toFixed(1) }}</span>
@@ -9,7 +10,7 @@
     </div>
 
     <div v-if="komentari.length > 0" class="comment-list">
-      <h3>Komentari:</h3>
+      <h3>KOMENTARI</h3>
       <div v-for="(komentarObj, index) in komentari" :key="index" class="komentar-card">
         <p><span>&#128100;</span> <strong>{{ komentarObj.Korisnik }}:</strong> {{ komentarObj.Komentar }}</p>
         <div class="star-rating">
@@ -18,9 +19,8 @@
       </div>
     </div>
 
-    <div class="comment-form" style="background-color: whitesmoke; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-      <h3>Unos komentara</h3>
-      <h6>Upišite svoj komentar o atrakciji</h6>
+    <div class="comment-form">
+      <h3>UNOS KOMENTARA I OCJENE</h3>
       <div class="form-input">
         <q-input class="textarea" outlined v-model="komentar" label="Unesi svoj komentar.." :dense="dense" />
       </div>
@@ -40,6 +40,7 @@
 
     <q-snackbar v-model="showSnackbar" :timeout="3000" message="Uspješno ste dodali komentar i ocjenu!" />
   </div>
+</div>
 </template>
 
 <script setup>
@@ -122,6 +123,20 @@ watch(komentari, (newValue) => {
 </script>
 
 <style scoped>
+.comment-container {
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.average-rating, .comment-form, .comment-list {
+  border: 1px solid #ce2e2e;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #8a91fa;
+  margin-bottom: 20px;
+}
+
 .star-rating {
   font-size: 30px;
 }
@@ -136,12 +151,6 @@ watch(komentari, (newValue) => {
 
 .star-rating .yellow-star {
   color: yellow;
-}
-
-.comment-container {
-  background-color:whitesmoke;
-  padding: 20px;
-  border-radius: 10px;
 }
 
 .comment-list {
@@ -182,6 +191,12 @@ button:hover {
 .rating {
   font-weight: bold;
   color: #4CAF50;
+}
+
+.page-container {
+  background-color: yellow;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 /* Snackbar */
