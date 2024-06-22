@@ -32,13 +32,16 @@
                 <q-input
                   ref="adresaRef"
                   v-model="inputAdresa"
-                  label="Drzava"
+                  label="Adresa"
                   placeholder="Adresa atrakcije"
                 ></q-input>
 
                 <!-- Upload slike -->
                 <div>
-                  <input type="file" @change="onFileChange" />
+                  <label for="file-upload" class="custom-file-upload">
+                    Odaberi datoteku
+                  </label>
+                  <input id="file-upload" type="file" @change="onFileChange" style="display: none;" />
                   <q-btn @click="convertImage">Spremi sliku</q-btn>
                   <q-separator></q-separator>
                   <div v-if="previewImage">
@@ -61,7 +64,7 @@
             <q-card>
               <q-card-section> Atrakcija je uspješno dodana! </q-card-section>
               <q-card-actions align="right">
-                <q-btn flat label="Ok" color="primary" v-close-popup @click="closeAndReload" />
+                <q-btn flat label="U redu" color="primary" v-close-popup @click="closeAndReload" />
               </q-card-actions>
             </q-card>
           </q-dialog>
@@ -135,7 +138,7 @@ export default {
     async submitForm() {
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("Token not found. Please log in.");
+        console.error("Token nije pronađen. Molimo prijavite se.");
         return;
       }
 
@@ -144,7 +147,7 @@ export default {
         const decoded = jwtDecode(token);
         userId = decoded.id;
       } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error('Greška pri dekodiranju tokena:', error);
         return;
       }
 
@@ -194,5 +197,16 @@ export default {
 <style>
 .bg-yellow {
   background-color: yellow;
+}
+.custom-file-upload {
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #fff;
+  background-color: #2196f3;
+  border-radius: 4px;
+}
+.custom-file-upload:hover {
+  background-color: #1976d2;
 }
 </style>
