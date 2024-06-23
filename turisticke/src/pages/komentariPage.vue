@@ -130,10 +130,10 @@ watch(komentari, (newValue) => {
 }
 
 .average-rating, .comment-form, .comment-list {
-  border: 1px solid #ce2e2e;
+  border: 1px solid black;
   padding: 20px;
   border-radius: 10px;
-  background-color: #8a91fa;
+  background-color: yellow;
   margin-bottom: 20px;
 }
 
