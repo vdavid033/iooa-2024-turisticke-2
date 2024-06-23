@@ -1,13 +1,15 @@
 <template>
   <div class="bg-yellow">
-    <q-input
-      v-model="searchTerm"
-      outlined
-      dense
-      placeholder="Pretražite atrakcije po nazivu..."
-      @keyup.enter="search"
-      class="my-search-bar"
-    />
+    <div class="search-bar-container">
+      <q-input
+        v-model="searchTerm"
+        outlined
+        dense
+        placeholder="Pretražite atrakcije po nazivu..."
+        @keyup.enter="search"
+        class="my-search-bar"
+      />
+    </div>
     <div class="q-pa-md row items-start q-gutter-md my-card-container">
       <q-card v-for="post in filteredPosts" :key="post.id_atrakcije" class="my-card">
         <q-img :src="post.slika" class="my-card-img" />
@@ -162,6 +164,21 @@ export default {
   color: black;
 }
 
+.search-bar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.my-search-bar {
+  width: 80%;
+  max-width: 600px;
+  font-size: 1.2rem;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #ffffff9d;
+}
+
 .my-card-container {
   display: flex;
   flex-wrap: wrap;
@@ -183,18 +200,10 @@ export default {
   object-fit: cover;
 }
 
-.my-search-bar {
-  margin-bottom: 10px;
-  margin-left: 20px;
-  background-color: #ffffff9d;
-  width: 50%;
-  border-radius: 10px;
-}
-
 @media (max-width: 1200px) {
   .my-card {
     flex: 1 1 calc(50% - 16px);
-    max-width: calc(50% - 16px );
+    max-width: calc(50% - 16px);
   }
 }
 
@@ -202,13 +211,6 @@ export default {
   .my-card {
     flex: 1 1 100%;
     max-width: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  .my-search-bar {
-    width: 100%;
-    margin-left: 0;
   }
 }
 

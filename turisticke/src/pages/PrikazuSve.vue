@@ -1,21 +1,19 @@
 <template>
   <div style="background-color: yellow">
-    <q-input
-      v-model="searchTerm"
-      outlined
-      dense
-      placeholder="Pretražite atrakcije po nazivu..."
-      @keyup.enter="search"
-      class="my-search-bar"
-    />
+    <div class="search-bar-container">
+      <q-input
+        v-model="searchTerm"
+        outlined
+        dense
+        placeholder="Pretražite atrakcije po nazivu..."
+        @keyup.enter="search"
+        class="my-search-bar"
+      />
+    </div>
     <div class="q-pa-md row items-start q-gutter-md my-card-container">
       <!-- Kartice atrakcija -->
-      <q-card
-        v-for="post in filteredPosts"
-        :key="post.id_atrakcije"
-        class="my-card"
-      >
-        <q-img :src="post.slika" class="my-card-img"/>
+      <q-card v-for="post in filteredPosts" :key="post.id_atrakcije" class="my-card">
+        <q-img :src="post.slika" class="my-card-img" />
 
         <q-card-section>
           <q-btn
@@ -28,18 +26,12 @@
           />
 
           <div class="myDiv" style="padding: 10px">
-            <q-rating
-              v-model="post.prosjecna_ocjena"
-              :max="5"
-              :readonly="true"
-              size="32px"
-            />
+            <q-rating v-model="post.prosjecna_ocjena" :max="5" :readonly="true" size="32px" />
           </div>
 
           <div class="row no-wrap items-center">
             <div class="col text-h6 ellipsis">{{ post.naziv }}</div>
           </div>
-
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -117,6 +109,21 @@ export default {
   color: white;
 }
 
+.search-bar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.my-search-bar {
+  width: 80%;
+  max-width: 600px;
+  font-size: 1.2rem;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #ffffff9d;
+}
+
 .my-card-container {
   display: flex;
   flex-wrap: wrap;
@@ -138,14 +145,6 @@ export default {
   object-fit: cover; /* Osigurava da slika pokriva područje bez iskrivljivanja */
 }
 
-.my-search-bar {
-  margin-bottom: 10px;
-  margin-left: 20px;
-  background-color: #ffffff9d;
-  width: 50%; /* Povećana širina */
-  border-radius: 10px;
-}
-
 @media (max-width: 1200px) {
   .my-card {
     flex: 1 1 calc(50% - 16px); /* Dvije kartice po redu */
@@ -160,4 +159,3 @@ export default {
   }
 }
 </style>
-
