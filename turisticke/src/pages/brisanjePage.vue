@@ -16,34 +16,29 @@
           <td>{{ user.korisnicko_ime }}</td>
           <td>{{ user.uloga }}</td>
           <td>
-            <button @click="deleteUser(user.id_korisnika)">Obriši</button>
+            <button @click="confirmDeleteUser(user.id_korisnika)">Obriši</button>
           </td>
         </tr>
       </tbody>
     </table>
+    <div v-if="notification" class="notification">{{ notification }}</div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 export default {
-  data() {
-    return {
-      users: ref([]),
-    };
-  },
-  created() {
-    this.fetchUsers();
-  },
-  methods: {
-    fetchUsers() {
+  setup() {
+    const users = ref([]);
+    const notification = ref('');
+
+    const fetchUsers = () => {
       axios.get('http://localhost:4200/users')
         .then(response => {
-          console.log('Response data:', response.data);
           if (response.data.status === 'success') {
-            this.users = response.data.data;
+            users.value = response.data.data;
           } else {
             console.error('Error fetching users:', response.data.message);
           }
@@ -51,15 +46,17 @@ export default {
         .catch(error => {
           console.error('HTTP error:', error);
         });
-    },
-    deleteUser(id) {
+    };
+
+    const deleteUser = (id) => {
       axios.delete(`http://localhost:4200/users/${id}`)
         .then(response => {
-          console.log('Response data:', response.data);
           if (response.data.status === 'success') {
-            // Remove the deleted user from the local list
-            this.users = this.users.filter(user => user.id_korisnika !== id);
-            console.log(`Korisnik s ID ${id} je uspješno obrisan.`);
+            fetchUsers();
+            notification.value = `Korisnik s ID ${id} je uspješno obrisan.`;
+            setTimeout(() => {
+              notification.value = '';
+            }, 3000);
           } else {
             console.error('Error deleting user:', response.data.message);
           }
@@ -67,7 +64,21 @@ export default {
         .catch(error => {
           console.error('HTTP error:', error);
         });
-    },
+    };
+
+    const confirmDeleteUser = (id) => {
+      if (window.confirm('Želite li izbrisati korisnika?')) {
+        deleteUser(id);
+      }
+    };
+
+    onMounted(fetchUsers);
+
+    return {
+      users,
+      confirmDeleteUser,
+      notification
+    };
   }
 };
 </script>
@@ -85,6 +96,14 @@ th, td {
 }
 
 th {
-  background-color:yellow;
+  background-color: yellow;
+}
+
+.notification {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: lightgreen;
+  border: 1px solid green;
+  border-radius: 5px;
 }
 </style>

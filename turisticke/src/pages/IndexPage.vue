@@ -14,16 +14,16 @@
 
         <q-card-section>
           <q-input v-model="post.opis" filled class="opis-input" type="textarea" autogrow placeholder="Uredivanje opisa" />
-          <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Uredivanje opisa" />
+          <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Uredivanje opis" />
         </q-card-section>
 
         <q-card-section>
-          <q-input v-model="newMainImageUrl" filled class="opis-input" type="text" placeholder="Novi URL glavne slike" />
+          <q-input v-model="newMainImageUrl" filled class="opis-input" type="text" placeholder="Nova glavna URL slike" />
           <q-btn class="primary-button" @click="spremiGlavnuSliku(post.id_atrakcije)" label="Spremi glavnu sliku" />
         </q-card-section>
 
         <q-card-section>
-          <q-input v-model="newGalleryImageUrl" filled class="opis-input" type="text" placeholder="Novi URL slike za galeriju" />
+          <q-input v-model="newGalleryImageUrl" filled class="opis-input" type="text" placeholder="Nova URL slike za galeriju" />
           <q-btn class="primary-button" @click="spremiSlikuUGaleriju(post.id_atrakcije)" label="Spremi sliku u galeriju" />
           <q-btn class="negative-button" @click="deleteById(post.id_atrakcije)" label="Obriši atrakciju" />
         </q-card-section>
