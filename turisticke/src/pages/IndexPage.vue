@@ -15,8 +15,8 @@
         <q-img :src="post.slika" class="my-card-img" />
 
         <q-card-section>
-          <q-input v-model="post.opis" filled class="opis-input" type="textarea" autogrow placeholder="Uredivanje opisa" />
-          <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Uredivanje opis" />
+          <q-input v-model="post.opis" filled class="opis-input" type="textarea" autogrow placeholder="Uređivanje opisa" />
+          <q-btn class="primary-button" @click="updateOpis(post.id_atrakcije, post.opis)" label="Uredi opis" />
         </q-card-section>
 
         <q-card-section>
@@ -37,11 +37,11 @@
     </div>
   </div>
 </template>
-
 <script>
 import { ref, computed, onMounted } from "vue";
 import { api } from "boot/axios";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Correct import for jwt-decode
+import { Notify } from "quasar"; // Importing Quasar Notify
 
 export default {
   setup() {
@@ -55,7 +55,7 @@ export default {
       const token = localStorage.getItem("token");
       if (!token) return console.error("Token not found. Please log in.");
 
-      const decodedToken = jwtDecode(token);
+      const decodedToken = jwtDecode(token); // Using the correct import
       const id_korisnika = decodedToken.id;
       if (!id_korisnika) return console.error("User ID missing in the token.");
 
@@ -124,6 +124,11 @@ export default {
     };
 
     const spremiGlavnuSliku = async (atrakcijaId) => {
+      if (!newMainImageUrl.value) {
+        Notify.create({ type: 'negative', message: 'URL glavne slike ne može biti prazan!' }); // Display notification
+        return;
+      }
+
       try {
         await api.put(`/update-slika/${atrakcijaId}`, { newImageUrl: newMainImageUrl.value });
         getPosts();
@@ -157,7 +162,6 @@ export default {
   },
 };
 </script>
-
 <style>
 .bg-yellow {
   background-color: yellow;
@@ -182,7 +186,10 @@ export default {
 .my-card-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+
+  background-color: yellowgreen;
+  flex-direction: row;
+
 }
 
 .my-card {
