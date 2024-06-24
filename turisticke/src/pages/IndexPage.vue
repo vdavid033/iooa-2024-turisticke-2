@@ -25,7 +25,8 @@
         </q-card-section>
 
         <q-card-section>
-          <q-input v-model="newGalleryImageUrl" filled class="opis-input" type="text" placeholder="Nova URL slike za galeriju" />
+          <q-input v-model="newGalleryImageUrl" filled class="opis-input" type="text" placeholder="Nova URL slike za galeriju" @input="previewImage(newGalleryImageUrl)" />
+          <q-img v-if="newGalleryImageUrl" :src="newGalleryImageUrl" class="image-preview" />
           <q-btn class="primary-button" @click="spremiSlikuUGaleriju(post.id_atrakcije)" label="Spremi sliku u galeriju" />
           <q-btn class="negative-button" @click="deleteById(post.id_atrakcije)" label="Obriši atrakciju" />
         </q-card-section>
@@ -37,6 +38,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { ref, computed, onMounted } from "vue";
 import { api } from "boot/axios";
@@ -50,6 +52,7 @@ export default {
     const newMainImageUrl = ref("");
     const newGalleryImageUrl = ref("");
     const showDescription = ref({});
+    const previewImageUrl = ref(""); // Added for image preview
 
     const getPosts = async () => {
       const token = localStorage.getItem("token");
@@ -143,9 +146,24 @@ export default {
         await api.post(`/slikee`, { VK_ID_atrakcije: atrakcijaId, slike: newGalleryImageUrl.value });
         getPosts();
         newGalleryImageUrl.value = "";
+        previewImageUrl.value = ""; // Clear preview after adding image
+
+        Notify.create({
+          type: 'positive',
+          message: 'Slika je uspješno spremljena u galeriju!'
+        });
+
       } catch (error) {
         console.error("Error adding gallery image:", error);
+        Notify.create({
+          type: 'negative',
+          message: 'Došlo je do greške prilikom spremanja slike u galeriju.'
+        });
       }
+    };
+
+    const previewImage = (imageUrl) => {
+      previewImageUrl.value = imageUrl;
     };
 
     onMounted(getPosts);
@@ -158,10 +176,11 @@ export default {
       );
     });
 
-    return { posts, searchTerm, newMainImageUrl, newGalleryImageUrl, showDescription, search, filteredPosts, deleteById, updateOpis, spremiGlavnuSliku, spremiSlikuUGaleriju };
+    return { posts, searchTerm, newMainImageUrl, newGalleryImageUrl, showDescription, previewImageUrl, search, filteredPosts, deleteById, updateOpis, spremiGlavnuSliku, spremiSlikuUGaleriju, previewImage };
   },
 };
 </script>
+
 <style>
 .bg-yellow {
   background-color: yellow;
@@ -186,10 +205,8 @@ export default {
 .my-card-container {
   display: flex;
   flex-wrap: wrap;
-
   background-color: yellowgreen;
   flex-direction: row;
-
 }
 
 .my-card {
@@ -241,5 +258,11 @@ export default {
 
 .q-card-section:not(:last-child) {
   margin-bottom: 10px;
+}
+
+.image-preview {
+  height: 100px;
+  margin-top: 10px;
+  object-fit: cover;
 }
 </style>
